@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "diffsmith"
+version = "0.1.0"
+description = "diffsmith: an evidence-based auditor for AI-generated patches"
+readme = "README.md"
+authors = [{ name = "diffsmith contributors" }]
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "transformers",
+    "datasets",
+    "scikit-learn",
+    "pandas",
+    "rich",
+    "tree-sitter",
+    "accelerate",
+]
+
+[project.scripts]
+diffsmith = "diffsmith.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

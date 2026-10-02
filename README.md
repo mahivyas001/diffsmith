@@ -1,6 +1,5 @@
-# 🛡️ AEGIS - The AI Fix Auditor
+# 🛡️ diffsmith: an evidence-based auditor for AI-generated patches.
 
-> **AI Code Fix Integrity & Prompt Injection Auditor**  
 > A local CLI security and code auditing tool that detects shallow hacks, edge-case bypasses, and embedded prompt-injection attacks in AI-generated code repairs.
 
 ---
@@ -11,13 +10,13 @@ As software engineering teams increasingly rely on autonomous coding agents and 
 1. **Shallow AI Hacks:** AI models generating lazy fixes—such as commenting out assertions, suppressing errors, or inserting hardcoded magic numbers—rather than fixing the root cause.
 2. **Indirect Prompt Injections:** Adversarial instructions hidden inside issue tickets or bug reports attempting to hijack the AI agent during automated patch generation.
 
-**Aegis** is an offline security barrier that audits both the prompt context and the resulting code diff before patches are committed or merged.
+**diffsmith** is an offline security barrier that audits both the prompt context and the resulting code diff before patches are committed or merged.
 
 ---
 
 ## 🏛️ Architecture
 
-Aegis uses a defense-in-depth pipeline combining rule-based heuristics with deep transformer models:
+diffsmith uses a defense-in-depth pipeline combining rule-based heuristics with deep transformer models:
 
 1. **Safety Scanner (`facebook/bart-large-mnli` + Fast Regex Layer)**
    - **Fast Layer (Regex):** Pre-empts common prompt injection vectors (`[ignore previous]`, `[system:]`, `[developer mode]`, DAN personas) in microseconds.
@@ -40,9 +39,10 @@ Aegis uses a defense-in-depth pipeline combining rule-based heuristics with deep
 Clone the repository and install dependencies in your Python environment:
 
 ```bash
-git clone https://github.com/mahivyas001/aegis.git
-cd aegis
+git clone https://github.com/mahivyas001/diffsmith.git
+cd diffsmith
 pip install -r requirements.txt
+pip install -e .
 ```
 
 *(Optional)* If training on GPU, ensure PyTorch with CUDA support is installed.
@@ -51,10 +51,16 @@ pip install -r requirements.txt
 
 ## 💻 Usage
 
-Run the Aegis CLI by providing the path to an issue report and its proposed patch diff:
+Run the diffsmith CLI by providing the path to an issue report and its proposed patch diff:
 
 ```bash
 python src/cli.py --issue demo/sample_issue.txt --diff demo/sample_patch.diff
+```
+
+Or, if installed with `pip install -e .`:
+
+```bash
+diffsmith --issue demo/sample_issue.txt --diff demo/sample_patch.diff
 ```
 
 ### CLI Arguments
@@ -63,7 +69,7 @@ python src/cli.py --issue demo/sample_issue.txt --diff demo/sample_patch.diff
 |---|:---:|---|
 | `--issue` | **Yes** | Path to the bug report / issue description text file |
 | `--diff` | **Yes** | Path to the code patch / unified diff file |
-| `--model-path` | No | Path to fine-tuned model weights (defaults to `./models/aegis-core-v1`) |
+| `--model-path` | No | Path to fine-tuned model weights (defaults to `./models/diffsmith-core-v1`) |
 
 ---
 
@@ -81,27 +87,35 @@ python -m src.data_loader
 ```bash
 python -m src.model_architecture
 ```
-*Fine-tunes `microsoft/codebert-base` on GPU/CPU with early stopping on F1 score and saves the checkpoint to `models/aegis-core-v1/`.*
+*Fine-tunes `microsoft/codebert-base` on GPU/CPU with early stopping on F1 score and saves the checkpoint to `models/diffsmith-core-v1/`.*
 
 ---
 
 ## 📂 Project Structure
 
 ```
-aegis/
+diffsmith/
 ├── demo/
 │   ├── sample_issue.txt         # Demo issue with prompt injection attempt
 │   └── sample_patch.diff        # Demo patch with shallow hardcoded fix
 ├── src/
+│   ├── diffsmith/               # Core diffsmith package
+│   │   ├── __init__.py
+│   │   ├── cli.py               # Main terminal CLI & Rich report generator
+│   │   ├── data_loader.py       # SWE-bench data loader & synthetic corruptor
+│   │   ├── model_architecture.py# CodeBERT fine-tuning pipeline
+│   │   ├── safety_scanner.py    # BART zero-shot prompt injection detector
+│   │   └── semantic_analyzer.py # Semantic audit engine
 │   ├── __init__.py
-│   ├── cli.py                   # Main terminal CLI & Rich report generator
-│   ├── data_loader.py           # SWE-bench data loader & synthetic corruptor
-│   ├── model_architecture.py    # CodeBERT fine-tuning pipeline
-│   ├── safety_scanner.py        # BART zero-shot prompt injection detector
-│   └── semantic_analyzer.py     # Semantic audit stubs
-├── models/                      # Fine-tuned model checkpoints (models/aegis-core-v1/)
+│   ├── cli.py                   # CLI module entry point
+│   ├── data_loader.py           # Data loader entry point
+│   ├── model_architecture.py    # Model architecture entry point
+│   ├── safety_scanner.py        # Safety scanner entry point
+│   └── semantic_analyzer.py     # Semantic analyzer entry point
+├── models/                      # Fine-tuned model checkpoints (models/diffsmith-core-v1/)
 ├── notebooks/                   # Prototyping and experiments
 ├── tests/                       # Test suites
+├── pyproject.toml               # Package build configuration
 ├── requirements.txt             # Project dependencies
 └── README.md
 ```
@@ -110,16 +124,16 @@ aegis/
 
 ## 📊 Sample Output
 
-When auditing a patch, Aegis renders an interactive terminal report:
+When auditing a patch, diffsmith renders an interactive terminal report:
 
 ```text
-┌────────────────────────────── 🛡️  AEGIS AUDIT REPORT ──────────────────────────────┐
-│                  AI Code Fix Integrity & Prompt Injection Auditor                  │
+┌──────────────────────────── 🛡️  DIFFSMITH AUDIT REPORT ────────────────────────────┐
+│                  an evidence-based auditor for AI-generated patches                │
 └────────────────────────────────────────────────────────────────────────────────────┘
 
   Issue File   demo/sample_issue.txt (142 chars)
   Patch Diff   demo/sample_patch.diff (128 chars)
-  Audit Engine models/aegis-core-v1 [CPU]
+  Audit Engine models/diffsmith-core-v1 [CPU]
 
 ╭─ 🔍 Input Safety Scan ─────────────────────────────────────────────────────────────╮
 │ • Status: CRITICAL (Confidence: 100.0% via regex)                                  │

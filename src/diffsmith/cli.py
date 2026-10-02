@@ -28,8 +28,6 @@ console = Console()
 
 DEFAULT_MODEL_DIR = os.path.join(PROJECT_ROOT, "models", "diffsmith-core-v1")
 ALT_LOCAL_MODEL_DIR = os.path.abspath("./models/diffsmith-core-v1")
-LEGACY_MODEL_DIR = os.path.join(PROJECT_ROOT, "models", "aegis-core-v1")
-ALT_LEGACY_MODEL_DIR = os.path.abspath("./models/aegis-core-v1")
 
 
 
@@ -39,15 +37,13 @@ ALT_LEGACY_MODEL_DIR = os.path.abspath("./models/aegis-core-v1")
 def resolve_model_path(custom_path: Optional[str] = None) -> str:
     """
     Resolve and validate the local model directory.
-    Checks custom path, ./models/diffsmith-core-v1, and legacy fallback paths.
+    Checks custom path first, then ./models/diffsmith-core-v1 and the project-root equivalent.
     """
     candidates = []
     if custom_path:
         candidates.append(os.path.abspath(custom_path))
     candidates.append(ALT_LOCAL_MODEL_DIR)
     candidates.append(DEFAULT_MODEL_DIR)
-    candidates.append(ALT_LEGACY_MODEL_DIR)
-    candidates.append(LEGACY_MODEL_DIR)
 
     for path in candidates:
         if os.path.isdir(path):

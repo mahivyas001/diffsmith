@@ -235,26 +235,18 @@ def train_model(
     per_device_bs = BATCH_SIZE if torch.cuda.is_available() else max(BATCH_SIZE // 2, 4)
     print(f"[Aegis] Per-device batch size: {per_device_bs}")
 
+    # Bulletproof Training Config
     training_args = TrainingArguments(
-        output_dir=checkpoint_dir,
-        num_train_epochs=EPOCHS,
-        learning_rate=LEARNING_RATE,
-        per_device_train_batch_size=per_device_bs,
-        per_device_eval_batch_size=per_device_bs,
-        warmup_ratio=0.1,                   # 10 % of steps for LR warm-up
-        weight_decay=0.01,                  # L2 regularisation
-        eval_strategy="epoch",              # evaluate at end of each epoch
-        save_strategy="epoch",
-        load_best_model_at_end=True,        # restore best checkpoint after training
-        metric_for_best_model="f1",
-        greater_is_better=True,
-        logging_dir=os.path.join(checkpoint_dir, "logs"),
-        logging_steps=50,
-        report_to="none",                   # disable WandB / TB unless configured
-        fp16=torch.cuda.is_available(),     # mixed precision only on CUDA
-        dataloader_num_workers=0,           # 0 is safest on Windows
+        output_dir="./models/checkpoint",
+        num_train_epochs=2,
+        per_device_train_batch_size=8,
+        learning_rate=2e-5,
+        logging_steps=10,
+        eval_strategy="no",
+        save_strategy="no",
+        report_to="none",
+        dataloader_num_workers=0 
     )
-
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
     trainer = Trainer(

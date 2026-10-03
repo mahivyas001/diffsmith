@@ -93,7 +93,7 @@ from typing import Optional, Tuple
 # ─────────────────────────────────────────────
 # 2. Preprocessing & Truncation Strategy
 # ─────────────────────────────────────────────
-def prioritize_patch_lines(patch_text: str, max_chars: Optional[int] = None) -> str:
+def prioritize_patch_lines(patch_text: str, max_chars: int | None = None) -> str:
     """
     Filter and prioritize patch lines:
     1. Retains hunk headers (e.g. '@@ ... @@') and file headers ('---', '+++').
@@ -139,7 +139,7 @@ def truncate_issue_and_patch(
     patch_text: str,
     tokenizer: AutoTokenizer,
     max_length: int = MAX_LENGTH,
-) -> Tuple[str, str]:
+) -> tuple[str, str]:
     """
     Truncation strategy:
     1. Issue first: when total tokens exceed max_length, truncate the issue description

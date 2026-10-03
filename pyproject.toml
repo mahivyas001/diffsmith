@@ -25,3 +25,30 @@ diffsmith = "diffsmith.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9",
+    "ruff>=0.4",
+    "pre-commit>=3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts   = "-q --tb=short"
+
+[tool.ruff]
+line-length    = 100
+target-version = "py310"
+exclude        = [".venv", "venv", "__pycache__", "models", "notebooks"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP"]
+ignore = [
+    "E501",   # line too long — ruff will wrap where it can; leave long strings
+    "UP007",  # Use X | Y for type hints — keep Optional for 3.10 compat
+    "UP035",  # typing.Optional deprecated — same
+    "F401",   # unused import — some imports are re-exported
+    "E402",   # module level import not at top of file — CLI lazy imports
+    "I001",   # import sort — let ruff --fix handle this
+]

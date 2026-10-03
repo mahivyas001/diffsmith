@@ -48,7 +48,7 @@ _CRITICAL_PATTERNS: list[tuple[re.Pattern, str]] = [
 ]
 
 
-def _fast_regex_scan(text: str) -> Optional[dict]:
+def _fast_regex_scan(text: str) -> dict | None:
     """
     Run all critical regex patterns against *text*.
 
@@ -213,7 +213,7 @@ def scan_batch(texts: list[str]) -> list[dict]:
     -------
     list[dict]  — same length and order as *texts*
     """
-    results: list[Optional[dict]] = [None] * len(texts)
+    results: list[dict | None] = [None] * len(texts)
     ai_indices: list[int] = []
 
     # Fast layer pass

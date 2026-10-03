@@ -34,7 +34,7 @@ ALT_LOCAL_MODEL_DIR = os.path.abspath("./models/diffsmith-core-v1")
 # ─────────────────────────────────────────────
 # Local Model Verification & Loader
 # ─────────────────────────────────────────────
-def resolve_model_path(custom_path: Optional[str] = None) -> str:
+def resolve_model_path(custom_path: str | None = None) -> str:
     """
     Resolve and validate the local model directory.
     Checks custom path first, then ./models/diffsmith-core-v1 and the project-root equivalent.
@@ -113,7 +113,7 @@ def make_progress_bar(percentage: float, width: int = 30) -> str:
 # ─────────────────────────────────────────────
 # Audit Pipeline
 # ─────────────────────────────────────────────
-def run_audit(diff_path: str, issue_path: str, model_path: Optional[str] = None) -> int:
+def run_audit(diff_path: str, issue_path: str, model_path: str | None = None) -> int:
     """
     Execute full diffsmith audit on an issue description and code patch.
     Returns exit code (0 for APPROVED, 1 for REJECTED / ERROR).
@@ -141,10 +141,10 @@ def run_audit(diff_path: str, issue_path: str, model_path: Optional[str] = None)
         )
         return 1
 
-    with open(issue_path, "r", encoding="utf-8", errors="replace") as f:
+    with open(issue_path, encoding="utf-8", errors="replace") as f:
         issue_text = f.read().strip()
 
-    with open(diff_path, "r", encoding="utf-8", errors="replace") as f:
+    with open(diff_path, encoding="utf-8", errors="replace") as f:
         diff_text = f.read().strip()
 
     if not issue_text:

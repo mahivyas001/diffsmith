@@ -15,19 +15,33 @@ To prevent cross-repository data leakage between training and evaluation, splits
 
 ---
 
-## 2. Investigation of `https://github.com/swe-bench/experiments`
+## 2. Investigation of `https://github.com/swe-bench/experiments` (`evaluation/lite/`)
 
-We inspected all 84 submission directories under `evaluation/lite/` in `https://github.com/swe-bench/experiments` (e.g., `20240402_sweagent_gpt4`, `20240530_autocoderover-v20240408`, `20240604_CodeR`).
-
-### Findings
-- **Paths inspected:** `evaluation/lite/{submission}/results/results.json`, `patch_stats.json`, `metadata.yaml`
-- **File format:** `results.json` contains JSON objects listing `instance_id` strings under keys `resolved`, `applied`, `no_generation`, `install_fail`, etc.
-- **Result:** **NONE FOUND**. The `swe-bench/experiments` repository stores evaluation metadata and lists of resolved instance IDs, but **does NOT store the actual model-generated code patches or diff text**.
+- **Total Lite Submissions:** 84 submission directories.
+- **Directory Structure (Sample Submissions):**
+  - `20240402_sweagent_gpt4`: `logo.png`, `metadata.yaml`, `README.md`, `figures/`, `results/end_condition.json`, `results/end_condition_resolved.json`, `results/file_f1.json`, `results/patch_stats.json`, `results/resolved_by_repo.json`, `results/resolved_by_time.json`, `results/results.json`
+  - `20240530_autocoderover-v20240408`: `logo.jpg`, `metadata.yaml`, `README.md`, `results/file_f1.json`, `results/patch_stats.json`, `results/resolved_by_repo.json`, `results/resolved_by_time.json`, `results/results.json`
+  - `20240604_CodeR`: `metadata.yaml`, `README.md`, `figs/`, `results/file_f1.json`, `results/patch_stats.json`, `results/resolved_by_repo.json`, `results/resolved_by_time.json`, `results/results.json`
+- **Predictions File:** **NOT FOUND** (no prediction files such as `all_preds.jsonl` or patch text files are present).
+- **Results File:** `results/results.json`
+- **First 300 characters of `20240402_sweagent_gpt4/results/results.json`:**
+  ```json
+  {
+    "no_generation": [
+      "sympy__sympy-13146",
+      "django__django-12284",
+      "pytest-dev__pytest-5103",
+      "sympy__sympy-20442",
+      "django__django-15851",
+      "sphinx-doc__sphinx-10451",
+      "django__django-13964",
+      "pytest-dev__pytest-7168",
+      "sphinx-doc__sphinx-8721",
+      "django__dja
+  ```
 
 ---
 
-## 3. Proposed Options for Held-Out Evaluation
+## 3. Dataset Clarifications
 
-1. **Option A (Synthetic Corruptions for Held-Out Set):** Generate synthetic negative patches (`source="synthetic"`) for the 32 held-out test instances using the 6 corruption strategies.
-2. **Option B (Hugging Face `SWE-bench/SWE-smith` Trajectories):** Stream/download model-generated patch strings and unit-test execution labels directly from `SWE-bench/SWE-smith`.
-3. **Option C (Agent Release Logs):** Download prediction `.jsonl` files from model agent releases (e.g., SWE-agent, Aider).
+- **`SWE-bench/SWE-smith`:** 59,026 synthetic bug injection task instances (columns: `instance_id`, `patch`, `FAIL_TO_PASS`, `PASS_TO_PASS`, `image_name`, `repo`, `problem_statement`). It contains task definitions, not model predictions or model resolution labels.

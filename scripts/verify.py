@@ -93,10 +93,12 @@ def check_environment() -> None:
         check("diffsmith importable", False, str(e))
 
 
-def check_no_aegis() -> None:
-    print("\n── aegis / duplicate checks ─────────────────────────────────────────")
+def check_no_legacy_name() -> None:
+    print("\n── legacy name / duplicate checks ───────────────────────────────────")
 
-    r = run(["git", "grep", "-i", "aegis"])
+    # Exclude verify.py itself from the grep check
+    target = "ae" + "gis"
+    r = run(["git", "grep", "-i", target, "--", ":!scripts/verify.py"])
     check("git grep -i aegis returns nothing", r.returncode != 0,
           r.stdout.strip()[:120] if r.returncode == 0 else "")
 
@@ -197,7 +199,7 @@ def main() -> None:
 
     check_git()
     check_environment()
-    check_no_aegis()
+    check_no_legacy_name()
     check_ruff()
     check_pytest()
 

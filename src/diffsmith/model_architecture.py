@@ -88,40 +88,138 @@ def load_tokenizer_and_model():
     return tokenizer, model
 
 
+from typing import Optional, Tuple
+
 # ─────────────────────────────────────────────
-# 2. Preprocessing
+# 2. Preprocessing & Truncation Strategy
 # ─────────────────────────────────────────────
-def build_preprocess_fn(tokenizer: AutoTokenizer):
+def prioritize_patch_lines(patch_text: str, max_chars: Optional[int] = None) -> str:
+    """
+    Filter and prioritize patch lines:
+    1. Retains hunk headers (e.g. '@@ ... @@') and file headers ('---', '+++').
+    2. Prioritizes added ('+') and removed ('-') lines over unchanged context lines (' ').
+    3. Drops unchanged context lines first when constrained by budget.
+    """
+    lines = patch_text.splitlines()
+    if not lines:
+        return patch_text
+
+    # Extract essential headers, changes, and context lines
+    filtered = []
+    for line in lines:
+        if line.startswith(("---", "+++", "diff ", "index ")) or line.startswith("@@"):
+            filtered.append(line)
+        elif (line.startswith("+") and not line.startswith("+++")) or (
+            line.startswith("-") and not line.startswith("---")
+        ):
+            filtered.append(line)
+        elif max_chars is None:
+            filtered.append(line)
+
+    candidate = "\n".join(filtered)
+    if max_chars is None or len(candidate) <= max_chars:
+        return candidate
+
+    # If still too long, keep hunk headers/file headers and as many change lines as fit
+    final_lines = []
+    curr = 0
+    for line in filtered:
+        if line.startswith("@@") or line.startswith(("---", "+++")):
+            final_lines.append(line)
+            curr += len(line) + 1
+        elif curr + len(line) + 1 <= max_chars:
+            final_lines.append(line)
+            curr += len(line) + 1
+
+    return "\n".join(final_lines)
+
+
+def truncate_issue_and_patch(
+    issue_text: str,
+    patch_text: str,
+    tokenizer: AutoTokenizer,
+    max_length: int = MAX_LENGTH,
+) -> Tuple[str, str]:
+    """
+    Truncation strategy:
+    1. Issue first: when total tokens exceed max_length, truncate the issue description
+       first to protect patch and hunk structure.
+    2. Keep hunk headers: preserves '@@ ... @@' diff hunk headers.
+    3. Prioritize added/removed lines: context lines are dropped before change lines.
+    """
+    special_tokens_count = 3  # [CLS] issue [SEP] patch [SEP]
+    budget = max_length - special_tokens_count
+    if budget <= 0:
+        return issue_text, patch_text
+
+    issue_ids = tokenizer.encode(issue_text, add_special_tokens=False, truncation=False)
+    patch_ids = tokenizer.encode(patch_text, add_special_tokens=False, truncation=False)
+
+    if len(issue_ids) + len(patch_ids) <= budget:
+        return issue_text, patch_text
+
+    # Content exceeds budget.
+    # Preserve patch priority while allocating a baseline floor for the issue
+    min_issue_budget = min(len(issue_ids), max(16, min(48, budget // 4)))
+    max_patch_budget = budget - min_issue_budget
+
+    # If patch exceeds its budget, prioritize diff lines (prune context lines first)
+    if len(patch_ids) > max_patch_budget:
+        pruned_patch = prioritize_patch_lines(patch_text)
+        pruned_ids = tokenizer.encode(pruned_patch, add_special_tokens=False, truncation=False)
+        if len(pruned_ids) > max_patch_budget:
+            char_limit = max_patch_budget * 4
+            pruned_patch = prioritize_patch_lines(pruned_patch, max_chars=char_limit)
+            pruned_ids = tokenizer.encode(pruned_patch, add_special_tokens=False, truncation=False)
+            if len(pruned_ids) > max_patch_budget:
+                pruned_patch = tokenizer.decode(pruned_ids[:max_patch_budget], skip_special_tokens=True)
+                pruned_ids = pruned_ids[:max_patch_budget]
+        patch_text = pruned_patch
+        patch_ids = pruned_ids
+
+    # Truncate issue first for whatever remaining budget exists
+    remaining_issue_budget = max(0, budget - len(patch_ids))
+    if len(issue_ids) > remaining_issue_budget:
+        issue_ids = issue_ids[:remaining_issue_budget]
+        issue_text = tokenizer.decode(issue_ids, skip_special_tokens=True)
+
+    return issue_text, patch_text
+
+
+def build_preprocess_fn(tokenizer: AutoTokenizer, max_length: int = MAX_LENGTH):
     """
     Factory that returns a ``preprocess_data`` function bound to *tokenizer*.
 
-    The input representation follows the standard CodeBERT dual-sequence format:
-
-        [CLS] <problem_statement> [SEP] <patch> [SEP]
-
-    Parameters
-    ----------
-    tokenizer : AutoTokenizer
-
-    Returns
-    -------
-    Callable[[dict], dict]
-        A HuggingFace-compatible map function.
+    Applies the truncation strategy:
+      - Issue first: when total length exceeds budget, issue is truncated first.
+      - Patch prioritization: keeps hunk headers ('@@') and prioritizes added/removed lines.
+    Applies dynamic padding:
+      - Tokens are NOT padded to max_length during tokenization (padding=False).
+      - DataCollatorWithPadding dynamically pads batches to the longest sequence in that batch.
     """
     def preprocess_data(examples: dict) -> dict:
-        """
-        Tokenize a batch of examples.
+        issues = examples["problem_statement"]
+        patches = examples["patch"]
 
-        ``text_pair`` makes the tokenizer insert the special tokens and
-        segment IDs automatically, giving the model the full
-        [CLS] A [SEP] B [SEP] input it expects.
-        """
+        processed_issues = []
+        processed_patches = []
+        for issue, patch in zip(issues, patches):
+            t_issue, t_patch = truncate_issue_and_patch(
+                str(issue or ""),
+                str(patch or ""),
+                tokenizer,
+                max_length=max_length,
+            )
+            processed_issues.append(t_issue)
+            processed_patches.append(t_patch)
+
+        # Dynamic padding: padding=False allows per-batch dynamic padding via collator
         encoded = tokenizer(
-            examples["problem_statement"],   # sequence A
-            examples["patch"],               # sequence B
+            processed_issues,
+            processed_patches,
             truncation=True,
-            padding="max_length",
-            max_length=MAX_LENGTH,
+            padding=False,
+            max_length=max_length,
         )
         encoded["labels"] = examples["label"]
         return encoded

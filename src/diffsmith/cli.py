@@ -162,8 +162,8 @@ def run_audit(diff_path: str, issue_path: str, model_path: Optional[str] = None)
             Panel(
                 "[bold red]No fine-tuned model found at local path:[/bold red] ./models/diffsmith-core-v1\n\n"
                 "[yellow]Please run the training pipeline first to build the local model:[/yellow]\n\n"
-                "    [bold cyan]python -m src.data_loader[/bold cyan]\n"
-                "    [bold cyan]python -m src.model_architecture[/bold cyan]\n\n"
+                "    [bold cyan]python -m diffsmith.data_loader[/bold cyan]\n"
+                "    [bold cyan]python -m diffsmith.model_architecture[/bold cyan]\n\n"
                 "[dim]diffsmith requires our locally fine-tuned CodeBERT model to perform semantic audits.[/dim]",
                 title="⚠ Model Missing",
                 border_style="yellow",
@@ -173,10 +173,7 @@ def run_audit(diff_path: str, issue_path: str, model_path: Optional[str] = None)
         return 1
 
     # ── Step 1: Safety Scan ────────────────────────────────────────────────
-    try:
-        from diffsmith.safety_scanner import scan_text
-    except ImportError:
-        from src.safety_scanner import scan_text
+    from diffsmith.safety_scanner import scan_text
 
     with console.status("[bold cyan]Step 1/2: Running Safety Scanner on Issue...", spinner="dots"):
         safety_result = scan_text(issue_text)
@@ -191,15 +188,20 @@ def run_audit(diff_path: str, issue_path: str, model_path: Optional[str] = None)
 
     # ── Step 2: Semantic Analysis ──────────────────────────────────────────
     import torch
+    from diffsmith.model_architecture import truncate_issue_and_patch
 
     with console.status(f"[bold cyan]Step 2/2: Loading {os.path.basename(resolved_path)} & Auditing Patch...", spinner="dots"):
         tokenizer, model, device = load_local_model(resolved_path)
 
+        trunc_issue, trunc_diff = truncate_issue_and_patch(
+            issue_text, diff_text, tokenizer, max_length=256
+        )
+
         inputs = tokenizer(
-            issue_text,
-            diff_text,
+            trunc_issue,
+            trunc_diff,
             truncation=True,
-            padding="max_length",
+            padding=True,
             max_length=256,
             return_tensors="pt",
         )

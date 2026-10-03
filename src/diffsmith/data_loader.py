@@ -10,7 +10,7 @@ from datasets import load_dataset
 # Constants
 # ─────────────────────────────────────────────
 DATASET_NAME = "princeton-nlp/SWE-bench_Lite"
-OUTPUT_DIR   = os.path.join(os.path.dirname(__file__), "..", "data", "processed")
+OUTPUT_DIR   = os.path.join(os.path.dirname(__file__), "..", "..", "data", "processed")
 OUTPUT_FILE  = os.path.join(OUTPUT_DIR, "training_data.csv")
 
 # Probability thresholds for corruption strategies

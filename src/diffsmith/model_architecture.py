@@ -13,7 +13,6 @@ from transformers import (
     TrainingArguments,
     Trainer,
     DataCollatorWithPadding,
-    EarlyStoppingCallback,
 )
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
@@ -28,9 +27,9 @@ EPOCHS           = 3
 LEARNING_RATE    = 2e-5
 BATCH_SIZE       = 8                          # drop to 4 if OOM on GPU / slow on CPU
 
-DATA_CSV         = os.path.join(os.path.dirname(__file__), "..", "data", "processed", "training_data.csv")
-CHECKPOINT_DIR   = os.path.join(os.path.dirname(__file__), "..", "models", "checkpoint")
-FINAL_MODEL_DIR  = os.path.join(os.path.dirname(__file__), "..", "models", "diffsmith-core-v1")
+DATA_CSV        = os.path.join(os.path.dirname(__file__), "..", "..", "data", "processed", "training_data.csv")
+CHECKPOINT_DIR  = os.path.join(os.path.dirname(__file__), "..", "..", "models", "checkpoint")
+FINAL_MODEL_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "models", "diffsmith-core-v1")
 
 
 # ─────────────────────────────────────────────
@@ -50,8 +49,8 @@ def get_device() -> str:
     else:
         device = "cpu"
         warnings.warn(
-            "\n[diffsmith] ⚠  No GPU found — training will run on CPU.\n"
-            "          This may take 10–20 minutes for the full SWE-bench Lite dataset.\n"
+            "\n[diffsmith] WARNING: No GPU found — training will run on CPU.\n"
+            "          This may take 10-20 minutes for the full SWE-bench Lite dataset.\n"
             "          Consider using Google Colab (free T4 GPU) if you need faster results.",
             UserWarning,
             stacklevel=2,
@@ -119,7 +118,7 @@ def build_preprocess_fn(tokenizer: AutoTokenizer):
         """
         encoded = tokenizer(
             examples["problem_statement"],   # sequence A
-            examples["patch"],              # sequence B
+            examples["patch"],               # sequence B
             truncation=True,
             padding="max_length",
             max_length=MAX_LENGTH,
@@ -133,7 +132,11 @@ def build_preprocess_fn(tokenizer: AutoTokenizer):
 # ─────────────────────────────────────────────
 # 3. Dataset Loading & Splitting
 # ─────────────────────────────────────────────
-def load_and_split_dataset(tokenizer: AutoTokenizer, csv_path: str = DATA_CSV) -> DatasetDict:
+def load_and_split_dataset(
+    tokenizer: AutoTokenizer,
+    csv_path: str = DATA_CSV,
+    smoke: bool = False,
+) -> DatasetDict:
     """
     Read the processed CSV, convert to a HuggingFace Dataset, tokenize,
     and split into train / validation sets.
@@ -143,6 +146,8 @@ def load_and_split_dataset(tokenizer: AutoTokenizer, csv_path: str = DATA_CSV) -
     tokenizer : AutoTokenizer
     csv_path  : str
         Path to ``training_data.csv`` produced by ``data_loader.py``.
+    smoke     : bool
+        If True, cap dataset at 50 samples for a quick end-to-end smoke test.
 
     Returns
     -------
@@ -159,25 +164,32 @@ def load_and_split_dataset(tokenizer: AutoTokenizer, csv_path: str = DATA_CSV) -
 
     df = df.dropna(subset=list(required_cols))
     df["label"] = df["label"].astype(int)
+
+    if smoke:
+        df = df.sample(n=min(50, len(df)), random_state=42).reset_index(drop=True)
+        print(f"[diffsmith] SMOKE MODE -- capped to {len(df)} samples.")
+
     print(f"[diffsmith] {len(df)} rows loaded  |  label distribution: {df['label'].value_counts().to_dict()}")
 
     # Convert to HuggingFace Dataset
     full_dataset = Dataset.from_pandas(df[["problem_statement", "patch", "label"]], preserve_index=False)
 
-    # 80 / 20 split (stratified-like via seed for reproducibility)
+    # 80 / 20 split (reproducible via seed)
     split = full_dataset.train_test_split(test_size=1 - TRAIN_SPLIT, seed=42)
 
     # Tokenize
     preprocess = build_preprocess_fn(tokenizer)
     tokenized = split.map(preprocess, batched=True, remove_columns=["problem_statement", "patch"])
-
     tokenized.set_format("torch")
 
     dataset_dict = DatasetDict({
         "train":      tokenized["train"],
         "validation": tokenized["test"],
     })
-    print(f"[diffsmith] Train: {len(dataset_dict['train'])} samples  |  Val: {len(dataset_dict['validation'])} samples")
+    print(
+        f"[diffsmith] Train: {len(dataset_dict['train'])} samples  "
+        f"|  Val: {len(dataset_dict['validation'])} samples"
+    )
     return dataset_dict
 
 
@@ -188,7 +200,7 @@ def compute_metrics(eval_pred) -> dict:
     """
     Compute accuracy, precision, recall, and F1 for binary classification.
 
-    Called by the HuggingFace Trainer at the end of every evaluation epoch.
+    Called by the HuggingFace Trainer at the end of every evaluation run.
     """
     logits, labels = eval_pred
     preds = np.argmax(logits, axis=-1)
@@ -214,6 +226,7 @@ def train_model(
     tokenizer: AutoTokenizer,
     dataset_dict: DatasetDict,
     checkpoint_dir: str = CHECKPOINT_DIR,
+    smoke: bool = False,
 ) -> Trainer:
     """
     Configure and run the HuggingFace Trainer fine-tuning loop.
@@ -224,29 +237,42 @@ def train_model(
     tokenizer     : AutoTokenizer
     dataset_dict  : DatasetDict  (keys: "train", "validation")
     checkpoint_dir: str
+    smoke         : bool
+        If True, run 1 epoch with batch_size=4 for a quick smoke test.
 
     Returns
     -------
     Trainer (already trained)
+
+    Notes
+    -----
+    - EarlyStoppingCallback is intentionally absent: it requires eval_strategy != "no".
+    - processing_class= replaces the deprecated tokenizer= kwarg (transformers >= 4.46).
+    - dataloader_num_workers=0 is required on Windows (no fork-based multiprocessing).
     """
     os.makedirs(checkpoint_dir, exist_ok=True)
 
-    # Determine per-device batch size — halve it on CPU to reduce memory pressure
-    per_device_bs = BATCH_SIZE if torch.cuda.is_available() else max(BATCH_SIZE // 2, 4)
-    print(f"[diffsmith] Per-device batch size: {per_device_bs}")
+    # Smoke mode: 1 epoch, small batch; production: configured constants
+    epochs = 1 if smoke else EPOCHS
+    per_device_bs = 4 if smoke else (
+        BATCH_SIZE if torch.cuda.is_available() else max(BATCH_SIZE // 2, 4)
+    )
+    print(f"[diffsmith] Epochs: {epochs}  |  Per-device batch size: {per_device_bs}")
 
-    # Bulletproof Training Config
     training_args = TrainingArguments(
-        output_dir="./models/checkpoint",
-        num_train_epochs=2,
-        per_device_train_batch_size=8,
-        learning_rate=2e-5,
-        logging_steps=10,
-        eval_strategy="no",
+        output_dir=checkpoint_dir,
+        num_train_epochs=epochs,
+        per_device_train_batch_size=per_device_bs,
+        learning_rate=LEARNING_RATE,
+        logging_steps=5 if smoke else 10,
+        eval_strategy="no",       # EarlyStoppingCallback requires eval; keep disabled
         save_strategy="no",
         report_to="none",
-        dataloader_num_workers=0 
+        dataloader_num_workers=0, # Windows: fork-based workers not supported
+        use_cpu=not torch.cuda.is_available(),
     )
+
+    # transformers >= 4.46: processing_class= replaces the deprecated tokenizer= kwarg
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
     trainer = Trainer(
@@ -254,10 +280,9 @@ def train_model(
         args=training_args,
         train_dataset=dataset_dict["train"],
         eval_dataset=dataset_dict["validation"],
-        tokenizer=tokenizer,
+        processing_class=tokenizer,   # replaces deprecated tokenizer= (>= 4.46)
         data_collator=data_collator,
         compute_metrics=compute_metrics,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=2)],
     )
 
     print("[diffsmith] Starting fine-tuning ...")
@@ -269,9 +294,13 @@ def train_model(
 # ─────────────────────────────────────────────
 # 6. Save Final Model
 # ─────────────────────────────────────────────
-def save_model(trainer: Trainer, tokenizer: AutoTokenizer, save_dir: str = FINAL_MODEL_DIR) -> None:
+def save_model(
+    trainer: Trainer,
+    tokenizer: AutoTokenizer,
+    save_dir: str = FINAL_MODEL_DIR,
+) -> None:
     """
-    Persist the best fine-tuned model and its tokenizer to *save_dir*.
+    Persist the fine-tuned model and its tokenizer to *save_dir*.
 
     Parameters
     ----------
@@ -288,22 +317,32 @@ def save_model(trainer: Trainer, tokenizer: AutoTokenizer, save_dir: str = FINAL
 # ─────────────────────────────────────────────
 # 7. Orchestration Entry-Point
 # ─────────────────────────────────────────────
-def run_training_pipeline() -> None:
+def run_training_pipeline(smoke: bool = False) -> None:
     """
     End-to-end pipeline:
-        load model → preprocess data → train → save.
+        load model -> preprocess data -> train -> save (skipped in smoke mode).
+
+    Run via:
+        python -m diffsmith.model_architecture           # full training
+        python -m diffsmith.model_architecture --smoke   # 50-sample / 1-epoch test
     """
+    import time
+    t0 = time.time()
+
     # Step 1 — Load model & tokenizer
     tokenizer, model = load_tokenizer_and_model()
 
     # Step 2 — Prepare dataset
-    dataset_dict = load_and_split_dataset(tokenizer)
+    dataset_dict = load_and_split_dataset(tokenizer, smoke=smoke)
 
     # Step 3 — Fine-tune
-    trainer = train_model(model, tokenizer, dataset_dict)
+    trainer = train_model(model, tokenizer, dataset_dict, smoke=smoke)
 
-    # Step 4 — Persist
-    save_model(trainer, tokenizer)
+    # Step 4 — Persist (skip in smoke mode to avoid committing half-trained weights)
+    if smoke:
+        print("[diffsmith] Smoke mode: skipping model save.")
+    else:
+        save_model(trainer, tokenizer)
 
     # Step 5 — Final eval report
     print("\n[diffsmith] Final evaluation on validation set:")
@@ -311,9 +350,23 @@ def run_training_pipeline() -> None:
     for k, v in metrics.items():
         print(f"  {k}: {v}")
 
+    elapsed = time.time() - t0
+    print(f"\n[diffsmith] Total wall time: {elapsed:.1f}s  ({elapsed/60:.1f} min)")
+
 
 # ─────────────────────────────────────────────
-# CLI hook  (python -m src.model_architecture)
+# CLI hook
+#   python -m diffsmith.model_architecture [--smoke]
 # ─────────────────────────────────────────────
 if __name__ == "__main__":
-    run_training_pipeline()
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="diffsmith training pipeline — fine-tunes CodeBERT for patch auditing."
+    )
+    parser.add_argument(
+        "--smoke",
+        action="store_true",
+        help="Run a quick 50-sample / 1-epoch smoke test (no model saved).",
+    )
+    args = parser.parse_args()
+    run_training_pipeline(smoke=args.smoke)

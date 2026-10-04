@@ -47,3 +47,8 @@ def test_no_newline_marker_ok():
 
 def test_prose_instead_of_diff():
     assert check_diff("Here is the fix: change y to 3.")[0] is False
+
+
+def test_form_feed_in_context_line_is_not_a_line_break():
+    d = GOOD.replace(" x = 1\n", " x = 1\x0c# section\n")
+    assert check_diff(d) == (True, "ok")

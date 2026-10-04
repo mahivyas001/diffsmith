@@ -21,7 +21,9 @@ def check_diff(patch):
     """Return (well_formed: bool, reason: str). reason is 'ok' when valid."""
     if not patch or not patch.strip():
         return False, "empty"
-    lines = patch.splitlines()
+    lines = patch.split("\n")  # not splitlines(): it also splits on \x0c etc.
+    if lines and lines[-1] == "":     # drop the artifact of a final newline
+        lines.pop()
     has_old = any(ln.startswith("--- ") for ln in lines)
     has_new = any(ln.startswith("+++ ") for ln in lines)
     if not (has_old and has_new):

@@ -49,3 +49,4 @@ build/
 Thumbs.db
 
 data/heldout/heldout.csv
+data/heldout/heldout_checked.csv

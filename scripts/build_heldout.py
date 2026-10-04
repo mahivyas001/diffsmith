@@ -130,11 +130,12 @@ def main():
             skipped.append((sub, f"results.json unavailable (status {st})"))
             continue
         res = json.loads(res_text)
-        resolved = set(res.get("resolved") or [])
-        generated = res.get("generated") or []
-        if not generated:
-            skipped.append((sub, "no 'generated' list in results.json"))
+        if not isinstance(res.get("resolved"), list):
+            skipped.append((sub, f"no 'resolved' list in results.json "
+                                 f"(keys: {sorted(res)[:8]})"))
             continue
+        resolved = set(res["resolved"])
+        applied = set(res["applied"]) if isinstance(res.get("applied"), list) else None
 
         pred_text, st = fetch(f"{S3}/{sub}/all_preds.jsonl")
         if pred_text is None:
@@ -155,7 +156,8 @@ def main():
             label = 1 if iid in resolved else 0
             rows.append({"submission": sub, "instance_id": iid, "repo": repo_of(iid),
                          "split": split_map.get(iid, "unknown"), "patch": patch,
-                         "resolved": label, "source": "real_agent"})
+                         "resolved": label, "source": "real_agent",
+                         "applied": "" if applied is None else int(iid in applied)})
             kept += 1
             n_res += label
         manifest.append({"submission": sub, "patches": kept, "resolved": n_res,
@@ -182,6 +184,13 @@ def main():
     print(f"submissions used: {len(manifest)}  skipped: {len(skipped)}")
     print(f"total labeled patches: {len(rows)}  (excluded empty: {empty})")
     print(f"resolved: {pos}  unresolved: {len(rows) - pos}  positive rate: {pos/len(rows):.1%}")
+    known = [r for r in rows if r["applied"] != ""]
+    if known:
+        a = [r for r in known if r["applied"] == 1]
+        print(f"rows with applied info: {len(known)}  applied cleanly: {len(a)}  "
+              f"applied-but-failed: {sum(1 for r in a if r['resolved'] == 0)}  "
+              f"resolved: {sum(r['resolved'] for r in a)}")
+        print(f"rows WITHOUT applied info: {len(rows) - len(known)}")
     print("rows per split:", dict(Counter(r["split"] for r in rows)))
     print("rows per repo:", dict(Counter(r["repo"] for r in rows)))
 

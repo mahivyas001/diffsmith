@@ -15,33 +15,31 @@ To prevent cross-repository data leakage between training and evaluation, splits
 
 ---
 
-## 2. Investigation of `https://github.com/swe-bench/experiments` (`evaluation/lite/`)
+## 2. Real Agent Held-Out Evaluation Dataset (`data/heldout/heldout.csv`)
 
-- **Total Lite Submissions:** 84 submission directories.
-- **Directory Structure (Sample Submissions):**
-  - `20240402_sweagent_gpt4`: `logo.png`, `metadata.yaml`, `README.md`, `figures/`, `results/end_condition.json`, `results/end_condition_resolved.json`, `results/file_f1.json`, `results/patch_stats.json`, `results/resolved_by_repo.json`, `results/resolved_by_time.json`, `results/results.json`
-  - `20240530_autocoderover-v20240408`: `logo.jpg`, `metadata.yaml`, `README.md`, `results/file_f1.json`, `results/patch_stats.json`, `results/resolved_by_repo.json`, `results/resolved_by_time.json`, `results/results.json`
-  - `20240604_CodeR`: `metadata.yaml`, `README.md`, `figs/`, `results/file_f1.json`, `results/patch_stats.json`, `results/resolved_by_repo.json`, `results/resolved_by_time.json`, `results/results.json`
-- **Predictions File:** **NOT FOUND** (no prediction files such as `all_preds.jsonl` or patch text files are present).
-- **Results File:** `results/results.json`
-- **First 300 characters of `20240402_sweagent_gpt4/results/results.json`:**
-  ```json
-  {
-    "no_generation": [
-      "sympy__sympy-13146",
-      "django__django-12284",
-      "pytest-dev__pytest-5103",
-      "sympy__sympy-20442",
-      "django__django-15851",
-      "sphinx-doc__sphinx-10451",
-      "django__django-13964",
-      "pytest-dev__pytest-7168",
-      "sphinx-doc__sphinx-8721",
-      "django__dja
-  ```
+### Data Source & Pipeline
+- **Source:** `swe-bench/experiments`
+- **Resolution Labels:** Retrieved from GitHub `evaluation/lite/<submission>/results/results.json` (`resolved` list).
+- **Model Patches:** Fetched from the public S3 bucket `swe-bench-submissions` at `lite/<submission>/all_preds.jsonl` (anonymous HTTPS).
+
+### Submissions & Row Counts
+- **Submissions Used:** 18 submissions (2 skipped: `20250114_Isoform` and `20250609_KGCompass` due to predictions file 404).
+- **Total Labeled Patches:** 5,123 labeled patches (181 empty patches excluded).
+- **Overall Resolution Stats:** 1,696 resolved, 3,427 unresolved; positive rate **33.1%** (per-submission resolve rates range from **3.0% to 57.8%**).
+- **Split Distribution (Grouped by Repo from `data/splits`):**
+  - **Train repos:** 3,290 rows
+  - **Val repo (`sympy/sympy`):** 1,297 rows
+  - **Test repos (`matplotlib`, `xarray`, `seaborn`):** 536 rows (covering 32 distinct instances)
+- **Patch Application Breakdown:**
+  - Applied info exists for 2,066 rows: 1,715 applied cleanly, 1,257 applied-but-failed, 458 resolved.
+  - 3,057 rows have no applied info.
 
 ---
 
-## 3. Dataset Clarifications
+## 3. Limitations & Evaluation Considerations
 
-- **`SWE-bench/SWE-smith`:** 59,026 synthetic bug injection task instances (columns: `instance_id`, `patch`, `FAIL_TO_PASS`, `PASS_TO_PASS`, `image_name`, `repo`, `problem_statement`). It contains task definitions, not model predictions or model resolution labels.
+- **Issue Overlap:** Only 299 distinct issues are repeated across agent submissions. Cross-validation must group by `instance_id`.
+- **Incomplete Application Metadata:** "Applied" info is missing for ~60% of rows.
+- **Repository Skew:** Heavy repository distribution skew toward `django/django` (1,970 rows) and `sympy/sympy` (1,297 rows).
+- **Shortcut & Fingerprint Risks:** Potential risks of agent-style formatting fingerprints and issue-difficulty shortcuts.
+- **Unresolved Semantics:** "Unresolved" indicates test suite failure, not necessarily a "shallow fix".

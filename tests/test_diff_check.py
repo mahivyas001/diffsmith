@@ -52,3 +52,10 @@ def test_prose_instead_of_diff():
 def test_form_feed_in_context_line_is_not_a_line_break():
     d = GOOD.replace(" x = 1\n", " x = 1\x0c# section\n")
     assert check_diff(d) == (True, "ok")
+
+
+def test_glued_diff_header_is_tolerated():
+    glued = GOOD.replace(
+        "diff --git a/a.py b/a.py\n--- a/a.py", "diff --git a/a.py b/a.py--- a/a.py"
+    )
+    assert check_diff(glued) == (True, "ok")

@@ -13,6 +13,9 @@ import re
 import sys
 from collections import Counter
 
+# Some agents emit "diff --git a/x b/x--- a/x" (missing newline). The SWE-bench
+# harness accepted these (resolved patches exist), so repair before checking.
+GLUED_HEADER_RE = re.compile(r"^(diff --git a/\S+ b/\S+)(--- )", re.MULTILINE)
 HUNK_RE = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -21,6 +24,7 @@ def check_diff(patch):
     """Return (well_formed: bool, reason: str). reason is 'ok' when valid."""
     if not patch or not patch.strip():
         return False, "empty"
+    patch = GLUED_HEADER_RE.sub(r"\1\n\2", patch)
     lines = patch.split("\n")  # not splitlines(): it also splits on \x0c etc.
     if lines and lines[-1] == "":     # drop the artifact of a final newline
         lines.pop()

@@ -102,6 +102,60 @@ def bootstrap_metric_ci(
     return (low, high)
 
 
+def calc_within_instance_auc(
+    df_split: pd.DataFrame,
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+    n_bootstraps: int = 500,
+    seed: int = 42,
+) -> dict:
+    """
+    Calculate Within-Instance ROC-AUC across instances that have at least one resolved
+    and one unresolved patch. Instances with only one label class are skipped.
+
+    Returns dict:
+        {
+            "mean_auc": float,
+            "n_instances": int,
+            "ci": tuple[float, float],
+        }
+    """
+    unique_ids = df_split["instance_id"].unique()
+    instance_aucs = []
+
+    for iid in unique_ids:
+        idx = np.where(df_split["instance_id"].values == iid)[0]
+        yt = y_true[idx]
+        yp = y_prob[idx]
+        if np.sum(yt == 1) > 0 and np.sum(yt == 0) > 0:
+            auc = float(roc_auc_score(yt, yp))
+            instance_aucs.append(auc)
+
+    n_instances = len(instance_aucs)
+    if n_instances == 0:
+        return {
+            "mean_auc": 0.0,
+            "n_instances": 0,
+            "ci": (0.0, 0.0),
+        }
+
+    mean_auc = float(np.mean(instance_aucs))
+    rng = np.random.default_rng(seed)
+    arr_aucs = np.array(instance_aucs)
+    boot_means = []
+    for _ in range(n_bootstraps):
+        sample = rng.choice(arr_aucs, size=n_instances, replace=True)
+        boot_means.append(float(np.mean(sample)))
+
+    low = float(np.percentile(boot_means, 2.5))
+    high = float(np.percentile(boot_means, 97.5))
+    return {
+        "mean_auc": mean_auc,
+        "n_instances": n_instances,
+        "ci": (low, high),
+    }
+
+
 # ─────────────────────────────────────────────
 # 3. Feature Extraction Helpers
 # ─────────────────────────────────────────────
@@ -180,8 +234,7 @@ def run_baselines() -> dict:
     print("The test split consists of 32 distinct instances across 3 held-out repositories "
           "('matplotlib/matplotlib', 'pydata/xarray', 'mwaskom/seaborn').")
 
-    # Subset 1: All test rows
-    # Subset 2: Well-formed test rows only
+    # Subsets for test evaluation
     subsets = {
         "all_test_rows": df_test,
         "well_formed_test_rows": df_test[df_test["well_formed"] == 1],
@@ -191,70 +244,79 @@ def run_baselines() -> dict:
     # Patch TF-IDF
     vec_patch = TfidfVectorizer(max_features=5000, ngram_range=(1, 2), token_pattern=r"(?u)\b\w+\b|[\+\-\@\=\#]")
     X_train_patch = vec_patch.fit_transform(df_train["patch"].fillna(""))
-    _X_val_patch = vec_patch.transform(df_val["patch"].fillna(""))
+    X_val_patch = vec_patch.transform(df_val["patch"].fillna(""))
     X_test_patch = vec_patch.transform(df_test["patch"].fillna(""))
 
     # Issue TF-IDF
     vec_issue = TfidfVectorizer(max_features=5000, ngram_range=(1, 2))
     X_train_issue = vec_issue.fit_transform(df_train["problem_statement"].fillna(""))
-    _X_val_issue = vec_issue.transform(df_val["problem_statement"].fillna(""))
+    X_val_issue = vec_issue.transform(df_val["problem_statement"].fillna(""))
     X_test_issue = vec_issue.transform(df_test["problem_statement"].fillna(""))
 
     # Patch size features
     scaler = StandardScaler()
     X_train_size = scaler.fit_transform(extract_patch_size_features(df_train["patch"]))
-    _X_val_size = scaler.transform(extract_patch_size_features(df_val["patch"]))
+    X_val_size = scaler.transform(extract_patch_size_features(df_val["patch"]))
     X_test_size = scaler.transform(extract_patch_size_features(df_test["patch"]))
 
     # Combined features (Patch TF-IDF + Issue TF-IDF + Size)
     from scipy.sparse import hstack  # noqa: PLC0415
     X_train_comb = hstack([X_train_patch, X_train_issue, X_train_size]).tocsr()
+    X_val_comb = hstack([X_val_patch, X_val_issue, X_val_size]).tocsr()
     X_test_comb = hstack([X_test_patch, X_test_issue, X_test_size]).tocsr()
 
     # Targets
     y_train = df_train["resolved"].values.astype(int)
+    y_val = df_val["resolved"].values.astype(int)
 
     # Train Baseline Models
-    models = {}
+    models_test = {}
+    models_val = {}
 
     # (A) TF-IDF + Logistic Regression on patch text
     clf_a = LogisticRegression(C=1.0, max_iter=1000, random_state=42)
     clf_a.fit(X_train_patch, y_train)
-    models["(A) Patch TF-IDF + LogReg"] = clf_a.predict_proba(X_test_patch)[:, 1]
+    models_test["(A) Patch TF-IDF + LogReg"] = clf_a.predict_proba(X_test_patch)[:, 1]
+    models_val["(A) Patch TF-IDF + LogReg"] = clf_a.predict_proba(X_val_patch)[:, 1]
 
     # (B) TF-IDF on issue text only
     clf_b = LogisticRegression(C=1.0, max_iter=1000, random_state=42)
     clf_b.fit(X_train_issue, y_train)
-    models["(B) Issue TF-IDF LogReg"] = clf_b.predict_proba(X_test_issue)[:, 1]
+    models_test["(B) Issue TF-IDF LogReg"] = clf_b.predict_proba(X_test_issue)[:, 1]
+    models_val["(B) Issue TF-IDF LogReg"] = clf_b.predict_proba(X_val_issue)[:, 1]
 
     # (C) Repo-prior
     repo_prior_map = df_train.groupby("repo")["resolved"].mean().to_dict()
     train_global_mean = float(y_train.mean())
-    prob_c_all = np.array([repo_prior_map.get(r, train_global_mean) for r in df_test["repo"]])
-    models["(C) Repo-Prior Baseline"] = prob_c_all
+    prob_c_test = np.array([repo_prior_map.get(r, train_global_mean) for r in df_test["repo"]])
+    prob_c_val = np.array([repo_prior_map.get(r, train_global_mean) for r in df_val["repo"]])
+    models_test["(C) Repo-Prior Baseline"] = prob_c_test
+    models_val["(C) Repo-Prior Baseline"] = prob_c_val
 
     # (D) Patch-size features only
     clf_d = LogisticRegression(C=1.0, max_iter=1000, random_state=42)
     clf_d.fit(X_train_size, y_train)
-    models["(D) Patch-Size Features LogReg"] = clf_d.predict_proba(X_test_size)[:, 1]
+    models_test["(D) Patch-Size Features LogReg"] = clf_d.predict_proba(X_test_size)[:, 1]
+    models_val["(D) Patch-Size Features LogReg"] = clf_d.predict_proba(X_val_size)[:, 1]
 
     # (E) Combined A+B+D
     clf_e = LogisticRegression(C=1.0, max_iter=1000, random_state=42)
     clf_e.fit(X_train_comb, y_train)
-    models["(E) Combined A+B+D LogReg"] = clf_e.predict_proba(X_test_comb)[:, 1]
+    models_test["(E) Combined A+B+D LogReg"] = clf_e.predict_proba(X_test_comb)[:, 1]
+    models_val["(E) Combined A+B+D LogReg"] = clf_e.predict_proba(X_val_comb)[:, 1]
 
-    # Evaluate Baselines across Subsets
+    # Evaluate Baselines across Test Subsets
     eval_results = {}
     for subset_name, sub_df in subsets.items():
         sub_indices = sub_df.index.values
-        # map to test relative index
         test_relative_indices = [np.where(df_test.index.values == idx)[0][0] for idx in sub_indices]
         sub_y_true = sub_df["resolved"].values.astype(int)
 
         eval_results[subset_name] = {}
-        for m_name, probs_all in models.items():
+        for m_name, probs_all in models_test.items():
             sub_probs = probs_all[test_relative_indices]
 
+            w_inst = calc_within_instance_auc(sub_df, sub_y_true, sub_probs)
             roc_auc = float(roc_auc_score(sub_y_true, sub_probs))
             pr_auc = float(average_precision_score(sub_y_true, sub_probs))
             prec_5fpr = calc_prec_at_fpr(sub_y_true, sub_probs, target_fpr=0.05)
@@ -264,14 +326,34 @@ def run_baselines() -> dict:
             roc_ci = bootstrap_metric_ci(sub_df, sub_y_true, sub_probs, roc_auc_score)
             pr_ci = bootstrap_metric_ci(sub_df, sub_y_true, sub_probs, average_precision_score)
 
-            eval_results[subset_name][m_name] = {
+            m_metrics = {
+                "within_instance_auc": w_inst["mean_auc"],
+                "within_instance_auc_ci": list(w_inst["ci"]),
+                "within_instance_n_instances": w_inst["n_instances"],
                 "roc_auc": roc_auc,
-                "roc_auc_ci": roc_ci,
+                "roc_auc_ci": list(roc_ci),
                 "pr_auc": pr_auc,
-                "pr_auc_ci": pr_ci,
+                "pr_auc_ci": list(pr_ci),
                 "prec_at_5fpr": prec_5fpr,
                 "fp_100_at_80rec": fp_100_rec80,
             }
+            if m_name == "(C) Repo-Prior Baseline":
+                m_metrics["note"] = "Repo-prior yields constant prediction on unseen test repos."
+
+            eval_results[subset_name][m_name] = m_metrics
+
+    # Evaluate Baselines on Val Split
+    val_eval_results = {}
+    for m_name, probs_val in models_val.items():
+        w_inst = calc_within_instance_auc(df_val, y_val, probs_val)
+        m_metrics = {
+            "within_instance_auc": w_inst["mean_auc"],
+            "within_instance_auc_ci": list(w_inst["ci"]),
+            "within_instance_n_instances": w_inst["n_instances"],
+        }
+        if m_name == "(C) Repo-Prior Baseline":
+            m_metrics["note"] = "Repo-prior yields constant prediction on validation split if single repo."
+        val_eval_results[m_name] = m_metrics
 
     # Extra Validation Checks for Baseline A (Patch TF-IDF)
     # 1. Leave-One-Repo-Out (LORO) AUC
@@ -289,12 +371,13 @@ def run_baselines() -> dict:
             pr = clf.predict_proba(x_te)[:, 1]
             loro_aucs.append(float(roc_auc_score(df_te["resolved"].values.astype(int), pr)))
 
-    # 2. Leave-One-Submission-Out (LOSO) AUC
+    # 2. Instance-Disjoint Leave-One-Submission-Out (LOSO) AUC
     subs = df["submission"].unique()
-    loso_aucs = []
+    loso_aucs_disjoint = []
     for s in subs:
-        df_tr = df[df["submission"] != s]
         df_te = df[df["submission"] == s]
+        te_instances = set(df_te["instance_id"].unique())
+        df_tr = df[(df["submission"] != s) & (~df["instance_id"].isin(te_instances))]
         if len(df_te["resolved"].unique()) > 1 and len(df_tr["resolved"].unique()) > 1:
             v = TfidfVectorizer(max_features=5000, ngram_range=(1, 2), token_pattern=r"(?u)\b\w+\b|[\+\-\@\=\#]")
             x_tr = v.fit_transform(df_tr["patch"].fillna(""))
@@ -302,17 +385,19 @@ def run_baselines() -> dict:
             clf = LogisticRegression(C=1.0, max_iter=1000, random_state=42)
             clf.fit(x_tr, df_tr["resolved"].values.astype(int))
             pr = clf.predict_proba(x_te)[:, 1]
-            loso_aucs.append(float(roc_auc_score(df_te["resolved"].values.astype(int), pr)))
+            loso_aucs_disjoint.append(float(roc_auc_score(df_te["resolved"].values.astype(int), pr)))
 
     extra_checks = {
         "loro_mean_auc": float(np.mean(loro_aucs)) if loro_aucs else 0.0,
-        "loso_mean_auc": float(np.mean(loso_aucs)) if loso_aucs else 0.0,
+        "loso_mean_auc": float(np.mean(loso_aucs_disjoint)) if loso_aucs_disjoint else 0.0,
+        "leaky_loso_shared_instances": 0.8974081909457838,
     }
 
     results_data = {
         "test_instances_count": 32,
         "test_repos": ["matplotlib/matplotlib", "pydata/xarray", "mwaskom/seaborn"],
         "eval_results": eval_results,
+        "val_eval_results": val_eval_results,
         "extra_checks": extra_checks,
     }
 
@@ -334,43 +419,75 @@ def generate_markdown_report(data: dict) -> str:
     lines = [
         "# Phase 2 Baseline Evaluation Results",
         "",
-        "**Note:** The test split consists of 32 distinct instances across 3 held-out repositories (`matplotlib/matplotlib`, `pydata/xarray`, `mwaskom/seaborn`).",
+        "**Note:** The test split consists of 32 distinct instances across 3 held-out repositories (`matplotlib/matplotlib`, `pydata/xarray`, `mwaskom/seaborn`). Within-instance AUC is computed across test instances with both resolved and unresolved candidate patches (n=24).",
+        "",
+        "## Baseline Feature Definitions",
+        "",
+        "- **(A) Patch TF-IDF + LogReg**: TF-IDF unigrams and bigrams extracted from patch diff text (`patch` column; max 5,000 features).",
+        "- **(B) Issue TF-IDF LogReg**: TF-IDF unigrams and bigrams extracted from problem statement text (`problem_statement` column; max 5,000 features).",
+        "- **(C) Repo-Prior Baseline**: Repository-level historical resolution rates computed on the training split.",
+        "- **(D) Patch-Size Features LogReg**: 5 scalar patch size metrics (`lines_added`, `lines_removed`, `total_lines_changed`, `files_touched`, `hunks_count`), standardized via `StandardScaler`.",
+        "- **(E) Combined A+B+D LogReg**: Concatenation of features from Baseline A, Baseline B, and Baseline D.",
+        "",
+        "**Feature Confirmation:** Neither `well_formed` nor `malformed_reason` are used as input features in any baseline model. `well_formed` is used strictly as an evaluation filtering mask, and `malformed_reason` is diagnostic metadata.",
         "",
         "## Baseline Results Table (Test Set)",
         "",
         "### Subset 1: All Test Rows",
         "",
-        "| Baseline Model | ROC-AUC (95% CI) | PR-AUC (95% CI) | Prec @ 5% FPR | FP / 100 @ 80% Rec |",
-        "|---|---|---|---|---|",
+        "| Baseline Model | Within-Inst AUC (95% CI) [Primary] | Global ROC-AUC (95% CI) | PR-AUC (95% CI) | Prec @ 5% FPR | FP / 100 @ 80% Rec |",
+        "|---|---|---|---|---|---|",
     ]
 
     for model_name, metrics in data["eval_results"]["all_test_rows"].items():
+        if model_name == "(C) Repo-Prior Baseline":
+            continue  # Excluded from main table because test repos are unseen
+        w_str = f"{metrics['within_instance_auc']:.3f} [{metrics['within_instance_auc_ci'][0]:.3f}-{metrics['within_instance_auc_ci'][1]:.3f}]"
         roc_str = f"{metrics['roc_auc']:.3f} [{metrics['roc_auc_ci'][0]:.3f}-{metrics['roc_auc_ci'][1]:.3f}]"
         pr_str = f"{metrics['pr_auc']:.3f} [{metrics['pr_auc_ci'][0]:.3f}-{metrics['pr_auc_ci'][1]:.3f}]"
         prec_str = f"{metrics['prec_at_5fpr']:.1%}"
         fp_str = f"{metrics['fp_100_at_80rec']:.1f}"
-        lines.append(f"| {model_name} | {roc_str} | {pr_str} | {prec_str} | {fp_str} |")
+        lines.append(f"| {model_name} | {w_str} | {roc_str} | {pr_str} | {prec_str} | {fp_str} |")
 
     lines.extend([
         "",
+        "*Note: Baseline (C) Repo-Prior Baseline is removed from the main table because test repos are unseen, making repo prior a constant prediction. It is retained in results/baselines.json with a note.*",
+        "",
         "### Subset 2: Well-Formed Test Rows Only (`well_formed=1`)",
         "",
-        "| Baseline Model | ROC-AUC (95% CI) | PR-AUC (95% CI) | Prec @ 5% FPR | FP / 100 @ 80% Rec |",
-        "|---|---|---|---|---|",
+        "| Baseline Model | Within-Inst AUC (95% CI) [Primary] | Global ROC-AUC (95% CI) | PR-AUC (95% CI) | Prec @ 5% FPR | FP / 100 @ 80% Rec |",
+        "|---|---|---|---|---|---|",
     ])
 
     for model_name, metrics in data["eval_results"]["well_formed_test_rows"].items():
+        if model_name == "(C) Repo-Prior Baseline":
+            continue  # Excluded from main table
+        w_str = f"{metrics['within_instance_auc']:.3f} [{metrics['within_instance_auc_ci'][0]:.3f}-{metrics['within_instance_auc_ci'][1]:.3f}]"
         roc_str = f"{metrics['roc_auc']:.3f} [{metrics['roc_auc_ci'][0]:.3f}-{metrics['roc_auc_ci'][1]:.3f}]"
         pr_str = f"{metrics['pr_auc']:.3f} [{metrics['pr_auc_ci'][0]:.3f}-{metrics['pr_auc_ci'][1]:.3f}]"
         prec_str = f"{metrics['prec_at_5fpr']:.1%}"
         fp_str = f"{metrics['fp_100_at_80rec']:.1f}"
-        lines.append(f"| {model_name} | {roc_str} | {pr_str} | {prec_str} | {fp_str} |")
+        lines.append(f"| {model_name} | {w_str} | {roc_str} | {pr_str} | {prec_str} | {fp_str} |")
+
+    lines.extend([
+        "",
+        "## Validation Split Results (SymPy - Within-Instance AUC)",
+        "",
+        "| Baseline Model | Within-Inst AUC (95% CI) | Valid Instances (n) |",
+        "|---|---|---|",
+    ])
+
+    for model_name, metrics in data["val_eval_results"].items():
+        w_str = f"{metrics['within_instance_auc']:.3f} [{metrics['within_instance_auc_ci'][0]:.3f}-{metrics['within_instance_auc_ci'][1]:.3f}]"
+        n_inst = metrics['within_instance_n_instances']
+        lines.append(f"| {model_name} | {w_str} | {n_inst} |")
 
     lines.extend([
         "",
         "## Generalizability Validation Checks (Baseline A - Patch TF-IDF)",
         f"- **Leave-One-Repo-Out (LORO) Mean ROC-AUC:** `{data['extra_checks']['loro_mean_auc']:.3f}`",
-        f"- **Leave-One-Submission-Out (LOSO) Mean ROC-AUC:** `{data['extra_checks']['loso_mean_auc']:.3f}`",
+        f"- **Instance-Disjoint Leave-One-Submission-Out (LOSO) Mean ROC-AUC:** `{data['extra_checks']['loso_mean_auc']:.3f}`",
+        f"- **Leaky LOSO (shared instances):** `{data['extra_checks']['leaky_loso_shared_instances']:.3f}` (kept for historical record)",
     ])
 
     return "\n".join(lines)

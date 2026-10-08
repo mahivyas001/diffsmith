@@ -7,6 +7,7 @@ Rule: No model training of any kind.
 import os
 import sys
 import numpy as np
+import pandas as pd
 
 # Ensure repository root is on sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -14,6 +15,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 from scripts.baselines import (
     calc_fp_per_100_at_recall,
     calc_prec_at_fpr,
+    calc_within_instance_auc,
     extract_patch_size_features,
 )
 
@@ -51,3 +53,29 @@ def test_extract_patch_size_features():
     assert features[0][0] == 2.0  # added
     assert features[0][1] == 1.0  # removed
     assert features[0][2] == 3.0  # total
+
+
+def test_calc_within_instance_auc_normal():
+    df = pd.DataFrame({
+        "instance_id": ["inst_1", "inst_1", "inst_2", "inst_2"]
+    })
+    y_true = np.array([1, 0, 1, 0])
+    y_prob = np.array([0.9, 0.1, 0.8, 0.2])
+    res = calc_within_instance_auc(df, y_true, y_prob)
+    assert res["n_instances"] == 2
+    assert res["mean_auc"] == 1.0
+    assert isinstance(res["ci"], tuple)
+    assert len(res["ci"]) == 2
+
+
+def test_calc_within_instance_auc_single_label_skipped():
+    df = pd.DataFrame({
+        "instance_id": ["inst_1", "inst_1", "inst_2", "inst_2"]
+    })
+    # inst_1 has both 1 and 0; inst_2 has only 0s (single label)
+    y_true = np.array([1, 0, 0, 0])
+    y_prob = np.array([0.9, 0.1, 0.8, 0.2])
+    res = calc_within_instance_auc(df, y_true, y_prob)
+    # inst_2 must be skipped, leaving only inst_1
+    assert res["n_instances"] == 1
+    assert res["mean_auc"] == 1.0

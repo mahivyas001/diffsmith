@@ -8,6 +8,12 @@
   "eval_results": {
     "all_test_rows": {
       "(A) Patch TF-IDF + LogReg": {
+        "within_instance_auc": 0.6247451548768951,
+        "within_instance_auc_ci": [
+          0.54024034715058,
+          0.704271722413956
+        ],
+        "within_instance_n_instances": 24,
         "roc_auc": 0.6128773528558508,
         "roc_auc_ci": [
           0.5145960719299579,
@@ -22,6 +28,12 @@
         "fp_100_at_80rec": 44.02985074626866
       },
       "(B) Issue TF-IDF LogReg": {
+        "within_instance_auc": 0.5,
+        "within_instance_auc_ci": [
+          0.5,
+          0.5
+        ],
+        "within_instance_n_instances": 24,
         "roc_auc": 0.684866635949419,
         "roc_auc_ci": [
           0.5546572301847875,
@@ -36,6 +48,12 @@
         "fp_100_at_80rec": 38.43283582089552
       },
       "(C) Repo-Prior Baseline": {
+        "within_instance_auc": 0.5,
+        "within_instance_auc_ci": [
+          0.5,
+          0.5
+        ],
+        "within_instance_n_instances": 24,
         "roc_auc": 0.5,
         "roc_auc_ci": [
           0.5,
@@ -47,9 +65,16 @@
           0.3907229155602761
         ],
         "prec_at_5fpr": 0.0,
-        "fp_100_at_80rec": 60.447761194029844
+        "fp_100_at_80rec": 60.447761194029844,
+        "note": "Repo-prior yields constant prediction on unseen test repos."
       },
       "(D) Patch-Size Features LogReg": {
+        "within_instance_auc": 0.5108626392557153,
+        "within_instance_auc_ci": [
+          0.4321643963802741,
+          0.5860199912013254
+        ],
+        "within_instance_n_instances": 24,
         "roc_auc": 0.5934913565077903,
         "roc_auc_ci": [
           0.5068301053541674,
@@ -64,6 +89,12 @@
         "fp_100_at_80rec": 50.93283582089553
       },
       "(E) Combined A+B+D LogReg": {
+        "within_instance_auc": 0.6749657556949223,
+        "within_instance_auc_ci": [
+          0.5786946989160532,
+          0.7686443923553299
+        ],
+        "within_instance_n_instances": 24,
         "roc_auc": 0.7212239116708477,
         "roc_auc_ci": [
           0.6495524122556742,
@@ -80,6 +111,12 @@
     },
     "well_formed_test_rows": {
       "(A) Patch TF-IDF + LogReg": {
+        "within_instance_auc": 0.6170300883076618,
+        "within_instance_auc_ci": [
+          0.5254167470941368,
+          0.7027014495155578
+        ],
+        "within_instance_n_instances": 24,
         "roc_auc": 0.6112896889174614,
         "roc_auc_ci": [
           0.5122823583849863,
@@ -94,6 +131,12 @@
         "fp_100_at_80rec": 43.54527938342967
       },
       "(B) Issue TF-IDF LogReg": {
+        "within_instance_auc": 0.5,
+        "within_instance_auc_ci": [
+          0.5,
+          0.5
+        ],
+        "within_instance_n_instances": 24,
         "roc_auc": 0.684203007250259,
         "roc_auc_ci": [
           0.546236656508229,
@@ -108,6 +151,12 @@
         "fp_100_at_80rec": 37.76493256262042
       },
       "(C) Repo-Prior Baseline": {
+        "within_instance_auc": 0.5,
+        "within_instance_auc_ci": [
+          0.5,
+          0.5
+        ],
+        "within_instance_n_instances": 24,
         "roc_auc": 0.5,
         "roc_auc_ci": [
           0.5,
@@ -119,9 +168,16 @@
           0.40471512770137524
         ],
         "prec_at_5fpr": 0.0,
-        "fp_100_at_80rec": 59.92292870905588
+        "fp_100_at_80rec": 59.92292870905588,
+        "note": "Repo-prior yields constant prediction on unseen test repos."
       },
       "(D) Patch-Size Features LogReg": {
+        "within_instance_auc": 0.5050460407307833,
+        "within_instance_auc_ci": [
+          0.415204324202486,
+          0.5928627343729594
+        ],
+        "within_instance_n_instances": 24,
         "roc_auc": 0.5906818100646452,
         "roc_auc_ci": [
           0.4965230093883723,
@@ -136,6 +192,12 @@
         "fp_100_at_80rec": 50.28901734104046
       },
       "(E) Combined A+B+D LogReg": {
+        "within_instance_auc": 0.664608713046213,
+        "within_instance_auc_ci": [
+          0.5620407298141674,
+          0.7568587243196618
+        ],
+        "within_instance_n_instances": 24,
         "roc_auc": 0.7173113325475909,
         "roc_auc_ci": [
           0.642870530804928,
@@ -151,8 +213,52 @@
       }
     }
   },
+  "val_eval_results": {
+    "(A) Patch TF-IDF + LogReg": {
+      "within_instance_auc": 0.5905641624624467,
+      "within_instance_auc_ci": [
+        0.520365951974224,
+        0.661490347085966
+      ],
+      "within_instance_n_instances": 50
+    },
+    "(B) Issue TF-IDF LogReg": {
+      "within_instance_auc": 0.5,
+      "within_instance_auc_ci": [
+        0.5,
+        0.5
+      ],
+      "within_instance_n_instances": 50
+    },
+    "(C) Repo-Prior Baseline": {
+      "within_instance_auc": 0.5,
+      "within_instance_auc_ci": [
+        0.5,
+        0.5
+      ],
+      "within_instance_n_instances": 50,
+      "note": "Repo-prior yields constant prediction on validation split if single repo."
+    },
+    "(D) Patch-Size Features LogReg": {
+      "within_instance_auc": 0.5381256109086991,
+      "within_instance_auc_ci": [
+        0.4623208184278957,
+        0.6152094024643657
+      ],
+      "within_instance_n_instances": 50
+    },
+    "(E) Combined A+B+D LogReg": {
+      "within_instance_auc": 0.6598368865158081,
+      "within_instance_auc_ci": [
+        0.5955830047879681,
+        0.7259362698575933
+      ],
+      "within_instance_n_instances": 50
+    }
+  },
   "extra_checks": {
     "loro_mean_auc": 0.5923730531766563,
-    "loso_mean_auc": 0.8974081909457838
+    "loso_mean_auc": 0.4916176085120479,
+    "leaky_loso_shared_instances": 0.8974081909457838
   }
 }

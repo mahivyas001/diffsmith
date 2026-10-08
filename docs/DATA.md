@@ -43,3 +43,13 @@ To prevent cross-repository data leakage between training and evaluation, splits
 - **Repository Skew:** Heavy repository distribution skew toward `django/django` (1,970 rows) and `sympy/sympy` (1,297 rows).
 - **Shortcut & Fingerprint Risks:** Potential risks of agent-style formatting fingerprints and issue-difficulty shortcuts.
 - **Unresolved Semantics:** "Unresolved" indicates test suite failure, not necessarily a "shallow fix".
+
+
+---
+
+## 4. Key Phase 2b Evaluation Findings
+
+- **Issue Difficulty Explains Most of the Label:** Baseline B (Issue TF-IDF) achieves a strong global ROC-AUC (~0.685) because issue problem statements allow predicting overall issue difficulty. However, its Within-Instance AUC is exactly `0.500` because issue text is identical for all candidate patches of a given issue, so it cannot distinguish resolved patches from unresolved patches for the same issue.
+- **LOSO was Leaky:** The original Leave-One-Submission-Out (LOSO) cross-validation shared `instance_id`s between training and held-out folds, yielding an artificially inflated mean AUC of `0.897`. The corrected instance-disjoint LOSO (excluding all instances in the test fold from training) yields a mean AUC of `0.492`, confirming that sharing issue instances creates severe data leakage.
+- **Test Set Constraints (32 Instances):** The held-out test split comprises 32 distinct instances across 3 unseen repositories (`matplotlib`, `xarray`, `seaborn`). 24 of these instances contain both resolved and unresolved patches necessary for within-instance evaluation.
+- **Confidence Intervals Overlap:** Bootstrap 95% confidence intervals overlap heavily across baseline models (e.g., Baseline A within-instance AUC `0.625 [0.540-0.704]` vs Combined E `0.675 [0.579-0.769]`), indicating that baselines cannot be strictly ranked with statistical significance on this test set size.

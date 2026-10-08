@@ -105,7 +105,7 @@ def check_no_legacy_name() -> None:
     # No duplicated module names under src/
     r = run(["git", "ls-files", "src"])
     files = r.stdout.splitlines()
-    basenames = [os.path.basename(f) for f in files if f.endswith(".py")]
+    basenames = [os.path.basename(f) for f in files if f.endswith(".py") and os.path.basename(f) != "__init__.py"]
     from collections import Counter  # noqa: PLC0415
     dupes = [n for n, c in Counter(basenames).items() if c > 1]
     check("no duplicated module names under src/", not dupes,

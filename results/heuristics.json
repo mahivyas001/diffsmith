@@ -1,0 +1,1610 @@
+{
+  "bar_status": "bar NOT met",
+  "bar_criteria": {
+    "val_within_instance_auc": 0.5054599138833208,
+    "val_pass": false,
+    "test_ci_lower_bound": 0.40900281775856223,
+    "ci_pass": false,
+    "control_i_h2_within_auc": 0.5017211802180633,
+    "control_i_pass": true
+  },
+  "overall_fire_rates": {
+    "rule_1_issue_file_overlap": {
+      "count": 3385,
+      "percentage": 66.07456568416943
+    },
+    "rule_2_issue_identifier_overlap": {
+      "count": 3342,
+      "percentage": 65.23521374194807
+    },
+    "rule_3_issue_literal_hardcoding": {
+      "count": 576,
+      "percentage": 11.243412063244193
+    },
+    "rule_4_special_casing": {
+      "count": 33,
+      "percentage": 0.6441538161233652
+    },
+    "rule_5_swallowed_exceptions": {
+      "count": 24,
+      "percentage": 0.4684755026351747
+    },
+    "rule_6_test_tampering": {
+      "count": 78,
+      "percentage": 1.5225453835643177
+    },
+    "rule_7_suppression_markers": {
+      "count": 11,
+      "percentage": 0.2147179387077884
+    },
+    "rule_8_scope_creep": {
+      "count": 1686,
+      "percentage": 32.910404060121024
+    }
+  },
+  "rare_rules_under_1pct": [
+    "rule_4_special_casing",
+    "rule_5_swallowed_exceptions",
+    "rule_7_suppression_markers"
+  ],
+  "submission_fire_rates": {
+    "20231010_rag_claude2": {
+      "patch_count": 299,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 197,
+          "percentage": 65.88628762541806
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 174,
+          "percentage": 58.19397993311036
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 15,
+          "percentage": 5.016722408026756
+        },
+        "rule_4_special_casing": {
+          "count": 2,
+          "percentage": 0.6688963210702341
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 1,
+          "percentage": 0.33444816053511706
+        },
+        "rule_6_test_tampering": {
+          "count": 1,
+          "percentage": 0.33444816053511706
+        },
+        "rule_7_suppression_markers": {
+          "count": 1,
+          "percentage": 0.33444816053511706
+        },
+        "rule_8_scope_creep": {
+          "count": 95,
+          "percentage": 31.77257525083612
+        }
+      }
+    },
+    "20240402_rag_claude3opus": {
+      "patch_count": 300,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 197,
+          "percentage": 65.66666666666666
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 172,
+          "percentage": 57.333333333333336
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 18,
+          "percentage": 6.0
+        },
+        "rule_4_special_casing": {
+          "count": 3,
+          "percentage": 1.0
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_6_test_tampering": {
+          "count": 2,
+          "percentage": 0.6666666666666667
+        },
+        "rule_7_suppression_markers": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_8_scope_creep": {
+          "count": 98,
+          "percentage": 32.666666666666664
+        }
+      }
+    },
+    "20240523_aider": {
+      "patch_count": 290,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 188,
+          "percentage": 64.82758620689654
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 177,
+          "percentage": 61.03448275862069
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 24,
+          "percentage": 8.275862068965518
+        },
+        "rule_4_special_casing": {
+          "count": 2,
+          "percentage": 0.6896551724137931
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_6_test_tampering": {
+          "count": 1,
+          "percentage": 0.3448275862068966
+        },
+        "rule_7_suppression_markers": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_8_scope_creep": {
+          "count": 87,
+          "percentage": 30.0
+        }
+      }
+    },
+    "20240612_IBM_Research_Agent101": {
+      "patch_count": 293,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 194,
+          "percentage": 66.21160409556313
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 238,
+          "percentage": 81.22866894197952
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 87,
+          "percentage": 29.692832764505116
+        },
+        "rule_4_special_casing": {
+          "count": 2,
+          "percentage": 0.6825938566552902
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 1,
+          "percentage": 0.3412969283276451
+        },
+        "rule_6_test_tampering": {
+          "count": 10,
+          "percentage": 3.4129692832764507
+        },
+        "rule_7_suppression_markers": {
+          "count": 2,
+          "percentage": 0.6825938566552902
+        },
+        "rule_8_scope_creep": {
+          "count": 83,
+          "percentage": 28.327645051194537
+        }
+      }
+    },
+    "20240617_moatless_gpt4o": {
+      "patch_count": 289,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 191,
+          "percentage": 66.08996539792388
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 170,
+          "percentage": 58.82352941176471
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 26,
+          "percentage": 8.996539792387544
+        },
+        "rule_4_special_casing": {
+          "count": 1,
+          "percentage": 0.34602076124567477
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_6_test_tampering": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_7_suppression_markers": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_8_scope_creep": {
+          "count": 87,
+          "percentage": 30.103806228373703
+        }
+      }
+    },
+    "20240627_abanteai_mentatbot_gpt4o": {
+      "patch_count": 296,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 193,
+          "percentage": 65.2027027027027
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 236,
+          "percentage": 79.72972972972973
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 73,
+          "percentage": 24.66216216216216
+        },
+        "rule_4_special_casing": {
+          "count": 2,
+          "percentage": 0.6756756756756757
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_6_test_tampering": {
+          "count": 10,
+          "percentage": 3.3783783783783785
+        },
+        "rule_7_suppression_markers": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_8_scope_creep": {
+          "count": 140,
+          "percentage": 47.2972972972973
+        }
+      }
+    },
+    "20240721_amazon-q-developer-agent-20240719-dev": {
+      "patch_count": 299,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 196,
+          "percentage": 65.55183946488295
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 202,
+          "percentage": 67.55852842809364
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 24,
+          "percentage": 8.02675585284281
+        },
+        "rule_4_special_casing": {
+          "count": 1,
+          "percentage": 0.33444816053511706
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_6_test_tampering": {
+          "count": 3,
+          "percentage": 1.0033444816053512
+        },
+        "rule_7_suppression_markers": {
+          "count": 1,
+          "percentage": 0.33444816053511706
+        },
+        "rule_8_scope_creep": {
+          "count": 92,
+          "percentage": 30.76923076923077
+        }
+      }
+    },
+    "20240808_RepoGraph_gpt4o": {
+      "patch_count": 294,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 194,
+          "percentage": 65.98639455782312
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 165,
+          "percentage": 56.12244897959183
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 23,
+          "percentage": 7.8231292517006805
+        },
+        "rule_4_special_casing": {
+          "count": 1,
+          "percentage": 0.3401360544217687
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_6_test_tampering": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_7_suppression_markers": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_8_scope_creep": {
+          "count": 88,
+          "percentage": 29.931972789115648
+        }
+      }
+    },
+    "20240829_Isoform": {
+      "patch_count": 297,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 195,
+          "percentage": 65.65656565656566
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 171,
+          "percentage": 57.57575757575758
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 21,
+          "percentage": 7.07070707070707
+        },
+        "rule_4_special_casing": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_6_test_tampering": {
+          "count": 1,
+          "percentage": 0.33670033670033667
+        },
+        "rule_7_suppression_markers": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_8_scope_creep": {
+          "count": 89,
+          "percentage": 29.96632996632997
+        }
+      }
+    },
+    "20241016_IBM-SWE-1.0": {
+      "patch_count": 299,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 198,
+          "percentage": 66.22073578595318
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 185,
+          "percentage": 61.87290969899666
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 27,
+          "percentage": 9.03010033444816
+        },
+        "rule_4_special_casing": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_6_test_tampering": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_7_suppression_markers": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_8_scope_creep": {
+          "count": 89,
+          "percentage": 29.76588628762542
+        }
+      }
+    },
+    "20241113_navie-2-gpt4o-sonnet": {
+      "patch_count": 299,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 197,
+          "percentage": 65.88628762541806
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 195,
+          "percentage": 65.21739130434783
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 24,
+          "percentage": 8.02675585284281
+        },
+        "rule_4_special_casing": {
+          "count": 1,
+          "percentage": 0.33444816053511706
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_6_test_tampering": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_7_suppression_markers": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_8_scope_creep": {
+          "count": 89,
+          "percentage": 29.76588628762542
+        }
+      }
+    },
+    "20241127_globant_codefixer_agent": {
+      "patch_count": 285,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 190,
+          "percentage": 66.66666666666666
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 185,
+          "percentage": 64.91228070175438
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 21,
+          "percentage": 7.368421052631578
+        },
+        "rule_4_special_casing": {
+          "count": 2,
+          "percentage": 0.7017543859649122
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 1,
+          "percentage": 0.3508771929824561
+        },
+        "rule_6_test_tampering": {
+          "count": 2,
+          "percentage": 0.7017543859649122
+        },
+        "rule_7_suppression_markers": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_8_scope_creep": {
+          "count": 84,
+          "percentage": 29.47368421052631
+        }
+      }
+    },
+    "20241207_kodu_sonnet_v1": {
+      "patch_count": 232,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 156,
+          "percentage": 67.24137931034483
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 197,
+          "percentage": 84.91379310344827
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 53,
+          "percentage": 22.844827586206897
+        },
+        "rule_4_special_casing": {
+          "count": 2,
+          "percentage": 0.8620689655172413
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 4,
+          "percentage": 1.7241379310344827
+        },
+        "rule_6_test_tampering": {
+          "count": 38,
+          "percentage": 16.379310344827587
+        },
+        "rule_7_suppression_markers": {
+          "count": 2,
+          "percentage": 0.8620689655172413
+        },
+        "rule_8_scope_creep": {
+          "count": 141,
+          "percentage": 60.775862068965516
+        }
+      }
+    },
+    "20250104_patched_codes_claude-3.5-sonnet-20241022": {
+      "patch_count": 192,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 132,
+          "percentage": 68.75
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 144,
+          "percentage": 75.0
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 24,
+          "percentage": 12.5
+        },
+        "rule_4_special_casing": {
+          "count": 5,
+          "percentage": 2.604166666666667
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 8,
+          "percentage": 4.166666666666666
+        },
+        "rule_6_test_tampering": {
+          "count": 2,
+          "percentage": 1.0416666666666665
+        },
+        "rule_7_suppression_markers": {
+          "count": 2,
+          "percentage": 1.0416666666666665
+        },
+        "rule_8_scope_creep": {
+          "count": 58,
+          "percentage": 30.208333333333332
+        }
+      }
+    },
+    "20250226_sweagent_claude-3-7-sonnet-20250219": {
+      "patch_count": 298,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 196,
+          "percentage": 65.77181208053692
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 222,
+          "percentage": 74.49664429530202
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 49,
+          "percentage": 16.44295302013423
+        },
+        "rule_4_special_casing": {
+          "count": 6,
+          "percentage": 2.013422818791946
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 3,
+          "percentage": 1.006711409395973
+        },
+        "rule_6_test_tampering": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_7_suppression_markers": {
+          "count": 1,
+          "percentage": 0.33557046979865773
+        },
+        "rule_8_scope_creep": {
+          "count": 93,
+          "percentage": 31.20805369127517
+        }
+      }
+    },
+    "20250509_Lingxi_claude-3-5-sonnet-20241022": {
+      "patch_count": 299,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 197,
+          "percentage": 65.88628762541806
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 201,
+          "percentage": 67.22408026755853
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 30,
+          "percentage": 10.033444816053512
+        },
+        "rule_4_special_casing": {
+          "count": 2,
+          "percentage": 0.6688963210702341
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 2,
+          "percentage": 0.6688963210702341
+        },
+        "rule_6_test_tampering": {
+          "count": 4,
+          "percentage": 1.3377926421404682
+        },
+        "rule_7_suppression_markers": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_8_scope_creep": {
+          "count": 97,
+          "percentage": 32.441471571906355
+        }
+      }
+    },
+    "20250627_agentless_MCTS-Refine-7B": {
+      "patch_count": 262,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 177,
+          "percentage": 67.55725190839695
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 134,
+          "percentage": 51.14503816793893
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 13,
+          "percentage": 4.961832061068702
+        },
+        "rule_4_special_casing": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 1,
+          "percentage": 0.38167938931297707
+        },
+        "rule_6_test_tampering": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_7_suppression_markers": {
+          "count": 2,
+          "percentage": 0.7633587786259541
+        },
+        "rule_8_scope_creep": {
+          "count": 83,
+          "percentage": 31.679389312977097
+        }
+      }
+    },
+    "20250911_isea_claude-3.5-sonnet-20241022": {
+      "patch_count": 300,
+      "rules": {
+        "rule_1_issue_file_overlap": {
+          "count": 197,
+          "percentage": 65.66666666666666
+        },
+        "rule_2_issue_identifier_overlap": {
+          "count": 174,
+          "percentage": 57.99999999999999
+        },
+        "rule_3_issue_literal_hardcoding": {
+          "count": 24,
+          "percentage": 8.0
+        },
+        "rule_4_special_casing": {
+          "count": 1,
+          "percentage": 0.33333333333333337
+        },
+        "rule_5_swallowed_exceptions": {
+          "count": 3,
+          "percentage": 1.0
+        },
+        "rule_6_test_tampering": {
+          "count": 4,
+          "percentage": 1.3333333333333335
+        },
+        "rule_7_suppression_markers": {
+          "count": 0,
+          "percentage": 0.0
+        },
+        "rule_8_scope_creep": {
+          "count": 93,
+          "percentage": 31.0
+        }
+      }
+    }
+  },
+  "val_eval_results": {
+    "(H1) Feature: fraction_touched_named": {
+      "within_instance_auc": 0.4797593966037594,
+      "within_instance_auc_ci": [
+        0.4448284674917947,
+        0.5083733280222864
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.5789080394673916,
+      "roc_auc_ci": [
+        0.4910063244724405,
+        0.6707824000192469
+      ],
+      "pr_auc": 0.293746853315182,
+      "pr_auc_ci": [
+        0.21277305079729644,
+        0.3954854133063474
+      ],
+      "prec_at_5fpr": 0.21311475409836064,
+      "fp_100_at_80rec": 55.744024672320734
+    },
+    "(H1) Feature: any_named_untouched": {
+      "within_instance_auc": 0.5018730158730158,
+      "within_instance_auc_ci": [
+        0.4913166666666666,
+        0.5121996031746031
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.4610659090337033,
+      "roc_auc_ci": [
+        0.3842483192297272,
+        0.550697997296045
+      ],
+      "pr_auc": 0.23972088823384377,
+      "pr_auc_ci": [
+        0.18454687833433042,
+        0.3109515677707556
+      ],
+      "prec_at_5fpr": 0.1864406779661017,
+      "fp_100_at_80rec": 58.134155744024675
+    },
+    "(H1) Feature: issue_identifier_overlap_frac": {
+      "within_instance_auc": 0.5072107064821525,
+      "within_instance_auc_ci": [
+        0.4480310090621978,
+        0.5568843189427901
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.6112285735860454,
+      "roc_auc_ci": [
+        0.5245586595923956,
+        0.6958054979435977
+      ],
+      "pr_auc": 0.3391976868898259,
+      "pr_auc_ci": [
+        0.23031221302930274,
+        0.4702879880758002
+      ],
+      "prec_at_5fpr": 0.45454545454545453,
+      "fp_100_at_80rec": 49.498843484965306
+    },
+    "(H1) Feature: literal_hardcoding_count": {
+      "within_instance_auc": 0.49227471139971146,
+      "within_instance_auc_ci": [
+        0.47444021464646463,
+        0.5067772456709957
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.48571572403030533,
+      "roc_auc_ci": [
+        0.43833111420735255,
+        0.5253489490115291
+      ],
+      "pr_auc": 0.24751839399933442,
+      "pr_auc_ci": [
+        0.18623418093683308,
+        0.30762096347940476
+      ],
+      "prec_at_5fpr": 0.12727272727272726,
+      "fp_100_at_80rec": 61.2952968388589
+    },
+    "(H1) Feature: has_literal_hardcoding": {
+      "within_instance_auc": 0.48970508658008655,
+      "within_instance_auc_ci": [
+        0.47138295454545454,
+        0.5046760416666667
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.4847356465050719,
+      "roc_auc_ci": [
+        0.435832024834065,
+        0.5251400666044947
+      ],
+      "pr_auc": 0.24726499680406633,
+      "pr_auc_ci": [
+        0.18620955155524604,
+        0.3071837637860464
+      ],
+      "prec_at_5fpr": 0.12727272727272726,
+      "fp_100_at_80rec": 61.2952968388589
+    },
+    "(H1) Feature: special_casing_count": {
+      "within_instance_auc": 0.5039547258297258,
+      "within_instance_auc_ci": [
+        0.5000244949494949,
+        0.5087468299062048
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.505219738729895,
+      "roc_auc_ci": [
+        0.4998509175722564,
+        0.5102078806748298
+      ],
+      "pr_auc": 0.2548792338203383,
+      "pr_auc_ci": [
+        0.19304282142949195,
+        0.3184310916313655
+      ],
+      "prec_at_5fpr": 0.12727272727272726,
+      "fp_100_at_80rec": 61.83500385505012
+    },
+    "(H1) Feature: has_special_casing": {
+      "within_instance_auc": 0.5035102813852813,
+      "within_instance_auc_ci": [
+        0.49958749999999996,
+        0.5082202786796537
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.5052071534647234,
+      "roc_auc_ci": [
+        0.4998437920807732,
+        0.5101784636518043
+      ],
+      "pr_auc": 0.2548744634566994,
+      "pr_auc_ci": [
+        0.19303461807829309,
+        0.3184279288664537
+      ],
+      "prec_at_5fpr": 0.12727272727272726,
+      "fp_100_at_80rec": 61.83500385505012
+    },
+    "(H1) Feature: swallowed_exception_count": {
+      "within_instance_auc": 0.49074242424242426,
+      "within_instance_auc_ci": [
+        0.47386249999999996,
+        0.5028227272727273
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.501116942283974,
+      "roc_auc_ci": [
+        0.49489855943044475,
+        0.5066159119897958
+      ],
+      "pr_auc": 0.25331412300137734,
+      "pr_auc_ci": [
+        0.19036966758449406,
+        0.3169758117101748
+      ],
+      "prec_at_5fpr": 0.12727272727272726,
+      "fp_100_at_80rec": 61.989205859676176
+    },
+    "(H1) Feature: has_swallowed_exception": {
+      "within_instance_auc": 0.49011742424242427,
+      "within_instance_auc_ci": [
+        0.4724772727272728,
+        0.5028227272727273
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.501102783860656,
+      "roc_auc_ci": [
+        0.4948614159525308,
+        0.5066159119897959
+      ],
+      "pr_auc": 0.253308695715837,
+      "pr_auc_ci": [
+        0.19036715349576594,
+        0.31697412920235263
+      ],
+      "prec_at_5fpr": 0.12727272727272726,
+      "fp_100_at_80rec": 61.989205859676176
+    },
+    "(H1) Feature: test_tampering_count": {
+      "within_instance_auc": 0.5202488175404842,
+      "within_instance_auc_ci": [
+        0.4976498797498798,
+        0.5511603600489017
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.5009486143623046,
+      "roc_auc_ci": [
+        0.49384341909208007,
+        0.5108061070166099
+      ],
+      "pr_auc": 0.25646459921440173,
+      "pr_auc_ci": [
+        0.19832397796410167,
+        0.3214722245549401
+      ],
+      "prec_at_5fpr": 0.21311475409836064,
+      "fp_100_at_80rec": 62.528912875867384
+    },
+    "(H1) Feature: has_test_tampering": {
+      "within_instance_auc": 0.5201253607503608,
+      "within_instance_auc_ci": [
+        0.49763506493506493,
+        0.5511017180735931
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.5008904075108862,
+      "roc_auc_ci": [
+        0.4938031831758822,
+        0.5107099677824677
+      ],
+      "pr_auc": 0.2532541409734557,
+      "pr_auc_ci": [
+        0.19313146282985488,
+        0.31757107378596605
+      ],
+      "prec_at_5fpr": 0.21311475409836064,
+      "fp_100_at_80rec": 62.528912875867384
+    },
+    "(H1) Feature: suppression_marker_count": {
+      "within_instance_auc": 0.5006666666666666,
+      "within_instance_auc_ci": [
+        0.5,
+        0.502
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.5005159958720331,
+      "roc_auc_ci": [
+        0.5,
+        0.5015650715125392
+      ],
+      "pr_auc": 0.25308641975308643,
+      "pr_auc_ci": [
+        0.19163867015337605,
+        0.31659631619339984
+      ],
+      "prec_at_5fpr": 0.12727272727272726,
+      "fp_100_at_80rec": 62.29760986892829
+    },
+    "(H1) Feature: has_suppression_marker": {
+      "within_instance_auc": 0.5006666666666666,
+      "within_instance_auc_ci": [
+        0.5,
+        0.502
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.5005159958720331,
+      "roc_auc_ci": [
+        0.5,
+        0.5015650715125392
+      ],
+      "pr_auc": 0.25308641975308643,
+      "pr_auc_ci": [
+        0.19163867015337605,
+        0.31659631619339984
+      ],
+      "prec_at_5fpr": 0.12727272727272726,
+      "fp_100_at_80rec": 62.29760986892829
+    },
+    "(H1) Feature: scope_creep_count": {
+      "within_instance_auc": 0.4720684217743041,
+      "within_instance_auc_ci": [
+        0.44045866737429235,
+        0.49565137074934873
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.5164221978907096,
+      "roc_auc_ci": [
+        0.4586832978123504,
+        0.5783229145174341
+      ],
+      "pr_auc": 0.2595441884237059,
+      "pr_auc_ci": [
+        0.19308130407000787,
+        0.327981929171321
+      ],
+      "prec_at_5fpr": 0.02040816326530612,
+      "fp_100_at_80rec": 59.21356977640709
+    },
+    "(H1) Feature: scope_creep_fraction": {
+      "within_instance_auc": 0.48045969716557946,
+      "within_instance_auc_ci": [
+        0.455948166539343,
+        0.49654988871422695
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.5197163910493594,
+      "roc_auc_ci": [
+        0.46037045619105477,
+        0.5820539449616714
+      ],
+      "pr_auc": 0.26015169058974563,
+      "pr_auc_ci": [
+        0.1937542572646248,
+        0.32932430484242076
+      ],
+      "prec_at_5fpr": 0.09433962264150944,
+      "fp_100_at_80rec": 59.13646877409406
+    },
+    "(H2) All Rule Features LogReg": {
+      "within_instance_auc": 0.5054599138833208,
+      "within_instance_auc_ci": [
+        0.4415278637116107,
+        0.5708402962443557
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.6278442699287674,
+      "roc_auc_ci": [
+        0.5306899309795217,
+        0.7173931206735343
+      ],
+      "pr_auc": 0.3552639801769614,
+      "pr_auc_ci": [
+        0.24531792100754454,
+        0.49129878904815677
+      ],
+      "prec_at_5fpr": 0.42857142857142855,
+      "fp_100_at_80rec": 45.56669236700077
+    },
+    "(H3) H2 + Baseline D Features LogReg": {
+      "within_instance_auc": 0.5384619134950017,
+      "within_instance_auc_ci": [
+        0.46943441853285606,
+        0.6087161614631285
+      ],
+      "within_instance_n_instances": 50,
+      "roc_auc": 0.6380241762943945,
+      "roc_auc_ci": [
+        0.5511910650040793,
+        0.7143858907975718
+      ],
+      "pr_auc": 0.36315806988102195,
+      "pr_auc_ci": [
+        0.2553169747836141,
+        0.5077562840866194
+      ],
+      "prec_at_5fpr": 0.42857142857142855,
+      "fp_100_at_80rec": 45.79799537393986
+    }
+  },
+  "test_eval_results": {
+    "(H1) Feature: fraction_touched_named": {
+      "within_instance_auc": 0.46059458226278077,
+      "within_instance_auc_ci": [
+        0.4175707520709818,
+        0.4980458413454737
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.5546340381235174,
+      "roc_auc_ci": [
+        0.43233226045215856,
+        0.6627037199777157
+      ],
+      "pr_auc": 0.30926548233295337,
+      "pr_auc_ci": [
+        0.19040226771904514,
+        0.43694290803345215
+      ],
+      "prec_at_5fpr": 0.24,
+      "fp_100_at_80rec": 53.54477611940298
+    },
+    "(H1) Feature: any_named_untouched": {
+      "within_instance_auc": 0.5018939393939393,
+      "within_instance_auc_ci": [
+        0.5,
+        0.5056818181818182
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.4915698220106145,
+      "roc_auc_ci": [
+        0.42347412915980964,
+        0.5798685105999981
+      ],
+      "pr_auc": 0.28243585991610576,
+      "pr_auc_ci": [
+        0.18759560646173393,
+        0.40436972685592093
+      ],
+      "prec_at_5fpr": 0.2692307692307692,
+      "fp_100_at_80rec": 58.02238805970149
+    },
+    "(H1) Feature: issue_identifier_overlap_frac": {
+      "within_instance_auc": 0.48415728045783196,
+      "within_instance_auc_ci": [
+        0.38232054465567794,
+        0.5710409966573798
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.5378675404017134,
+      "roc_auc_ci": [
+        0.4146528784979256,
+        0.6522564444475072
+      ],
+      "pr_auc": 0.32022163613326515,
+      "pr_auc_ci": [
+        0.21754312087190814,
+        0.4526801528336531
+      ],
+      "prec_at_5fpr": 0.36666666666666664,
+      "fp_100_at_80rec": 55.223880597014926
+    },
+    "(H1) Feature: literal_hardcoding_count": {
+      "within_instance_auc": 0.4959856031087648,
+      "within_instance_auc_ci": [
+        0.4547464347165634,
+        0.5356884581241199
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.4873803307223673,
+      "roc_auc_ci": [
+        0.41676783811748314,
+        0.5332697157778377
+      ],
+      "pr_auc": 0.27998696859533967,
+      "pr_auc_ci": [
+        0.17444236392503745,
+        0.384377525797912
+      ],
+      "prec_at_5fpr": 0.09523809523809523,
+      "fp_100_at_80rec": 57.08955223880597
+    },
+    "(H1) Feature: has_literal_hardcoding": {
+      "within_instance_auc": 0.4910831560188178,
+      "within_instance_auc_ci": [
+        0.450283240681908,
+        0.5298205524561223
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.48291779723203476,
+      "roc_auc_ci": [
+        0.40721548583201395,
+        0.5309858829893658
+      ],
+      "pr_auc": 0.2786784248123199,
+      "pr_auc_ci": [
+        0.1733421038520549,
+        0.3829647050849774
+      ],
+      "prec_at_5fpr": 0.09523809523809523,
+      "fp_100_at_80rec": 57.08955223880597
+    },
+    "(H1) Feature: special_casing_count": {
+      "within_instance_auc": 0.5013888888888889,
+      "within_instance_auc_ci": [
+        0.5,
+        0.5041666666666667
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.5091383812010444,
+      "roc_auc_ci": [
+        0.5,
+        0.5239285353705324
+      ],
+      "pr_auc": 0.2892249527410208,
+      "pr_auc_ci": [
+        0.1916394378254976,
+        0.3927893738140417
+      ],
+      "prec_at_5fpr": 0.05,
+      "fp_100_at_80rec": 59.88805970149254
+    },
+    "(H1) Feature: has_special_casing": {
+      "within_instance_auc": 0.5013888888888889,
+      "within_instance_auc_ci": [
+        0.5,
+        0.5041666666666667
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.5091383812010444,
+      "roc_auc_ci": [
+        0.5,
+        0.5239285353705324
+      ],
+      "pr_auc": 0.2892249527410208,
+      "pr_auc_ci": [
+        0.1916394378254976,
+        0.3927893738140417
+      ],
+      "prec_at_5fpr": 0.05,
+      "fp_100_at_80rec": 59.88805970149254
+    },
+    "(H1) Feature: swallowed_exception_count": {
+      "within_instance_auc": 0.4960978835978836,
+      "within_instance_auc_ci": [
+        0.4882837301587302,
+        0.5027777777777778
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.496075018345023,
+      "roc_auc_ci": [
+        0.4856020382270046,
+        0.5042147997348736
+      ],
+      "pr_auc": 0.28385390888600487,
+      "pr_auc_ci": [
+        0.1855374951542028,
+        0.3884102419743445
+      ],
+      "prec_at_5fpr": 0.05,
+      "fp_100_at_80rec": 60.07462686567165
+    },
+    "(H1) Feature: has_swallowed_exception": {
+      "within_instance_auc": 0.4960978835978836,
+      "within_instance_auc_ci": [
+        0.4882837301587302,
+        0.5027777777777778
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.496075018345023,
+      "roc_auc_ci": [
+        0.485645478739751,
+        0.5042147997348736
+      ],
+      "pr_auc": 0.2838556737175101,
+      "pr_auc_ci": [
+        0.1855515287492955,
+        0.3884181888814762
+      ],
+      "prec_at_5fpr": 0.05,
+      "fp_100_at_80rec": 60.07462686567165
+    },
+    "(H1) Feature: test_tampering_count": {
+      "within_instance_auc": 0.5208333333333334,
+      "within_instance_auc_ci": [
+        0.5,
+        0.5625
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.5032679738562091,
+      "roc_auc_ci": [
+        0.5,
+        0.5125043947029181
+      ],
+      "pr_auc": 0.2901180372646571,
+      "pr_auc_ci": [
+        0.19608571191503485,
+        0.3949224572276401
+      ],
+      "prec_at_5fpr": 0.36666666666666664,
+      "fp_100_at_80rec": 57.08955223880597
+    },
+    "(H1) Feature: has_test_tampering": {
+      "within_instance_auc": 0.5208333333333334,
+      "within_instance_auc_ci": [
+        0.5,
+        0.5625
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.5032679738562091,
+      "roc_auc_ci": [
+        0.5,
+        0.5125043947029181
+      ],
+      "pr_auc": 0.2901180372646571,
+      "pr_auc_ci": [
+        0.19608571191503485,
+        0.3949224572276401
+      ],
+      "prec_at_5fpr": 0.36666666666666664,
+      "fp_100_at_80rec": 57.08955223880597
+    },
+    "(H1) Feature: suppression_marker_count": {
+      "within_instance_auc": 0.5,
+      "within_instance_auc_ci": [
+        0.5,
+        0.5
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.5013054830287207,
+      "roc_auc_ci": [
+        0.5,
+        0.5039473684210527
+      ],
+      "pr_auc": 0.28598130841121494,
+      "pr_auc_ci": [
+        0.18990800865800866,
+        0.3910358498238004
+      ],
+      "prec_at_5fpr": 0.05,
+      "fp_100_at_80rec": 60.07462686567165
+    },
+    "(H1) Feature: has_suppression_marker": {
+      "within_instance_auc": 0.5,
+      "within_instance_auc_ci": [
+        0.5,
+        0.5
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.5013054830287207,
+      "roc_auc_ci": [
+        0.5,
+        0.5039473684210527
+      ],
+      "pr_auc": 0.28598130841121494,
+      "pr_auc_ci": [
+        0.18990800865800866,
+        0.3910358498238004
+      ],
+      "prec_at_5fpr": 0.05,
+      "fp_100_at_80rec": 60.07462686567165
+    },
+    "(H1) Feature: scope_creep_count": {
+      "within_instance_auc": 0.4170914852440588,
+      "within_instance_auc_ci": [
+        0.3537010832219932,
+        0.4750184807193079
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.49688561238246387,
+      "roc_auc_ci": [
+        0.3859587908629993,
+        0.607500913802441
+      ],
+      "pr_auc": 0.28549361828651787,
+      "pr_auc_ci": [
+        0.1798129276013074,
+        0.4122082021719412
+      ],
+      "prec_at_5fpr": 0.2692307692307692,
+      "fp_100_at_80rec": 56.71641791044776
+    },
+    "(H1) Feature: scope_creep_fraction": {
+      "within_instance_auc": 0.4519945162408398,
+      "within_instance_auc_ci": [
+        0.41263680882706616,
+        0.4870900023519509
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.515742589463984,
+      "roc_auc_ci": [
+        0.406439142158054,
+        0.6216615506807717
+      ],
+      "pr_auc": 0.2910509165610793,
+      "pr_auc_ci": [
+        0.1819690690614491,
+        0.41975173752876804
+      ],
+      "prec_at_5fpr": 0.2692307692307692,
+      "fp_100_at_80rec": 55.41044776119403
+    },
+    "(H2) All Rule Features LogReg": {
+      "within_instance_auc": 0.5028462400322081,
+      "within_instance_auc_ci": [
+        0.40900281775856223,
+        0.5921053330732788
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.5569804945476885,
+      "roc_auc_ci": [
+        0.42588734940218,
+        0.6774368068974392
+      ],
+      "pr_auc": 0.3535725725912465,
+      "pr_auc_ci": [
+        0.22482175916223548,
+        0.5017882219752092
+      ],
+      "prec_at_5fpr": 0.45714285714285713,
+      "fp_100_at_80rec": 53.54477611940298
+    },
+    "(H3) H2 + Baseline D Features LogReg": {
+      "within_instance_auc": 0.5023704908585424,
+      "within_instance_auc_ci": [
+        0.4084576034880492,
+        0.5992845091489393
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.5867762248502534,
+      "roc_auc_ci": [
+        0.47488179680586334,
+        0.6862294731835268
+      ],
+      "pr_auc": 0.3888897763408874,
+      "pr_auc_ci": [
+        0.24746585852346595,
+        0.5374653307883003
+      ],
+      "prec_at_5fpr": 0.5,
+      "fp_100_at_80rec": 49.440298507462686
+    }
+  },
+  "controls": {
+    "control_i_method_note": "3-fold submission-group CV (6 subs held out / 12 train). Per-submission instance-disjoint LSGO is degenerate in this dataset (every instance_id appears in all 18 submissions, so exclusion empties training).",
+    "control_i_lsgo_within_auc": {
+      "H2_All_Rule_Features": 0.5017211802180633,
+      "Baseline_A_Patch_TFIDF": 0.6695415090113039,
+      "n_folds": 3
+    },
+    "control_ii_submission_prediction": {
+      "accuracy": 0.12313432835820895,
+      "chance_level": 0.05555555555555555,
+      "majority_prevalence_test": 0.05970149253731343
+    }
+  },
+  "top10_worst_patches": [
+    {
+      "abs_idx": 3755,
+      "instance_id": "matplotlib__matplotlib-25442",
+      "submission": "20241207_kodu_sonnet_v1",
+      "resolved": 1,
+      "h2_prob": 0.000559105441037747,
+      "error": 0.9994408945589622,
+      "patch_snippet": "diff --git a/lib/matplotlib/offsetbox.py b/lib/matplotlib/offsetbox.py\nindex 77768e7..2a85a9f 100644\n--- a/lib/matplotlib/offsetbox.py\n+++ b/lib/matplotlib/offsetbox.py\n@@ -1508,7 +1508,15 @@ class DraggableBase:\n         ]\n\n     # A property, not an attribute, to maintain picklability.\n-    canvas = property(lambda self: self.ref_artist.figure.canvas)\n+    @property\n+    def canvas(self):\n+        \"\"\"Get the canvas, handling the case where figure is None.\"\"\"\n+        try:\n+            if self.r"
+    },
+    {
+      "abs_idx": 3989,
+      "instance_id": "matplotlib__matplotlib-26020",
+      "submission": "20250226_sweagent_claude-3-7-sonnet-20250219",
+      "resolved": 1,
+      "h2_prob": 0.0017930510161587917,
+      "error": 0.9982069489838412,
+      "patch_snippet": "diff --git a/lib/mpl_toolkits/axes_grid1/axes_grid.py b/lib/mpl_toolkits/axes_grid1/axes_grid.py\nindex 2b1b1d3200..a0098ea520 100644\n--- a/lib/mpl_toolkits/axes_grid1/axes_grid.py\n+++ b/lib/mpl_toolkits/axes_grid1/axes_grid.py\n@@ -13,8 +13,48 @@ from .mpl_axes import Axes\n def _tick_only(ax, bottom_on, left_on):\n     bottom_off = not bottom_on\n     left_off = not left_on\n-    ax.axis[\"bottom\"].toggle(ticklabels=bottom_off, label=bottom_off)\n-    ax.axis[\"left\"].toggle(ticklabels=left_off, label="
+    },
+    {
+      "abs_idx": 1809,
+      "instance_id": "matplotlib__matplotlib-23562",
+      "submission": "20240721_amazon-q-developer-agent-20240719-dev",
+      "resolved": 1,
+      "h2_prob": 0.2502919271329167,
+      "error": 0.7497080728670833,
+      "patch_snippet": "--- a/lib/mpl_toolkits/mplot3d/art3d.py\n+++ b/lib/mpl_toolkits/mplot3d/art3d.py\n@@ -867,10 +867,17 @@\n         self.stale = True\n \n     def get_facecolor(self):\n-        return self._facecolors2d\n+        if hasattr(self, '_facecolors2d'):\n+            return self._facecolors2d\n+        else:\n+            return self._facecolor3d\n \n     def get_edgecolor(self):\n-        return self._edgecolors2d\n+        # Check if _edgecolors2d exists, otherwise fall back to _edgecolor3d\n+        if hasattr(sel"
+    },
+    {
+      "abs_idx": 3094,
+      "instance_id": "matplotlib__matplotlib-23562",
+      "submission": "20241113_navie-2-gpt4o-sonnet",
+      "resolved": 1,
+      "h2_prob": 0.2502919271329167,
+      "error": 0.7497080728670833,
+      "patch_snippet": "diff --git a/lib/mpl_toolkits/mplot3d/art3d.py b/lib/mpl_toolkits/mplot3d/art3d.py\nindex 8fe6e7a..ee4bc48 100644\n--- a/lib/mpl_toolkits/mplot3d/art3d.py\n+++ b/lib/mpl_toolkits/mplot3d/art3d.py\n@@ -467,6 +467,9 @@ class Patch3DCollection(PatchCollection):\n             return np.nan\n \n     def _maybe_depth_shade_and_sort_colors(self, color_array):\n+        if color_array is None or len(color_array) == 0:\n+            return np.empty((0, 4))\n+            \n         color_array = (\n             _zalp"
+    },
+    {
+      "abs_idx": 4043,
+      "instance_id": "matplotlib__matplotlib-24265",
+      "submission": "20250226_sweagent_claude-3-7-sonnet-20250219",
+      "resolved": 1,
+      "h2_prob": 0.2502919271329167,
+      "error": 0.7497080728670833,
+      "patch_snippet": "diff --git a/lib/matplotlib/style/core.py b/lib/matplotlib/style/core.py\nindex fb0a5426e6..c4b0d16928 100644\n--- a/lib/matplotlib/style/core.py\n+++ b/lib/matplotlib/style/core.py\n@@ -259,3 +259,66 @@ def reload_library():\n \n \n reload_library()\n+\n+\n+# Add backward compatibility for direct access to seaborn styles\n+class _StyleLibrary(dict):\n+    \"\"\"Dictionary-like object that provides backward compatibility for seaborn styles.\"\"\"\n+    \n+    _SEABORN_STYLES = [\n+        \"seaborn\",\n+        \"seabor"
+    },
+    {
+      "abs_idx": 4948,
+      "instance_id": "matplotlib__matplotlib-23562",
+      "submission": "20250911_isea_claude-3.5-sonnet-20241022",
+      "resolved": 1,
+      "h2_prob": 0.2502919271329167,
+      "error": 0.7497080728670833,
+      "patch_snippet": "diff --git a/lib/mpl_toolkits/mplot3d/art3d.py b/lib/mpl_toolkits/mplot3d/art3d.py\nindex 8fe6e7a9c1..5a7849782d 100644\n--- a/lib/mpl_toolkits/mplot3d/art3d.py\n+++ b/lib/mpl_toolkits/mplot3d/art3d.py\n@@ -681,6 +681,7 @@ class Poly3DCollection(PolyCollection):\n         triangulation and thus generates consistent surfaces.\n     \"\"\"\n \n+\n     def __init__(self, verts, *args, zsort='average', **kwargs):\n         \"\"\"\n         Parameters\n@@ -708,7 +709,8 @@ class Poly3DCollection(PolyCollection):\n      "
+    },
+    {
+      "abs_idx": 3741,
+      "instance_id": "matplotlib__matplotlib-24265",
+      "submission": "20241207_kodu_sonnet_v1",
+      "resolved": 1,
+      "h2_prob": 0.2626166273341333,
+      "error": 0.7373833726658667,
+      "patch_snippet": "diff --git a/lib/matplotlib/style/core.py b/lib/matplotlib/style/core.py\nindex fb0a542..4751d95 100644\n--- a/lib/matplotlib/style/core.py\n+++ b/lib/matplotlib/style/core.py\n@@ -251,10 +251,31 @@ library = None\n available = []\n\n\n+class StyleLibrary(dict):\n+    \"\"\"A dict subclass for style library that handles deprecated style names.\"\"\"\n+    def __getitem__(self, style):\n+        try:\n+            return super().__getitem__(style)\n+        except KeyError as e:\n+            # Handle deprecated sea"
+    },
+    {
+      "abs_idx": 703,
+      "instance_id": "matplotlib__matplotlib-23562",
+      "submission": "20240523_aider",
+      "resolved": 1,
+      "h2_prob": 0.26769958570806146,
+      "error": 0.7323004142919385,
+      "patch_snippet": "diff --git a/lib/mpl_toolkits/mplot3d/art3d.py b/lib/mpl_toolkits/mplot3d/art3d.py\nindex 8fe6e7a9c1..bdfa4ff7a8 100644\n--- a/lib/mpl_toolkits/mplot3d/art3d.py\n+++ b/lib/mpl_toolkits/mplot3d/art3d.py\n@@ -707,6 +707,8 @@ class Poly3DCollection(PolyCollection):\n             if any(len(np.shape(vert)) != 2 for vert in verts):\n                 raise ValueError('verts must be a list of (N, 3) array-like')\n         self.set_zsort(zsort)\n+        self._facecolors2d = np.empty((0, 4))\n+        self._edge"
+    },
+    {
+      "abs_idx": 439,
+      "instance_id": "pydata__xarray-5131",
+      "submission": "20240402_rag_claude3opus",
+      "resolved": 1,
+      "h2_prob": 0.2773936853579008,
+      "error": 0.7226063146420991,
+      "patch_snippet": "\ndiff --git a/xarray/core/groupby.py b/xarray/core/groupby.py\nindex 1d4c8d8e..c1c1c1d5 100644\n--- a/xarray/core/groupby.py\n+++ b/xarray/core/groupby.py\n@@ -436,7 +436,7 @@ class GroupBy(SupportsArithmetic):\n         return zip(self._unique_coord.values, self._iter_grouped())\n \n     def __repr__(self):\n-        return \"{}, grouped over {!r} \\n{!r} groups with labels {}.\".format(\n+        return \"{}, grouped over {!r}\\n{!r} groups with labels {}.\".format(\n             self.__class__.__name__,\n    "
+    },
+    {
+      "abs_idx": 745,
+      "instance_id": "pydata__xarray-5131",
+      "submission": "20240523_aider",
+      "resolved": 1,
+      "h2_prob": 0.2773936853579008,
+      "error": 0.7226063146420991,
+      "patch_snippet": "diff --git a/xarray/core/groupby.py b/xarray/core/groupby.py\nindex 8a097251..af5abd9a 100644\n--- a/xarray/core/groupby.py\n+++ b/xarray/core/groupby.py\n@@ -436,7 +436,7 @@ class GroupBy(SupportsArithmetic):\n         return zip(self._unique_coord.values, self._iter_grouped())\n \n     def __repr__(self):\n-        return \"{}, grouped over {!r} \\n{!r} groups with labels {}.\".format(\n+        return \"{}, grouped over {!r}\\n{!r} groups with labels {}.\".format(\n             self.__class__.__name__,\n     "
+    }
+  ],
+  "baselines_reference": {
+    "(A) Patch TF-IDF + LogReg": {
+      "within_instance_auc": 0.6247451548768951,
+      "within_instance_auc_ci": [
+        0.54024034715058,
+        0.704271722413956
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.6128773528558508,
+      "roc_auc_ci": [
+        0.5145960719299579,
+        0.7084661762603885
+      ],
+      "pr_auc": 0.366485792838249,
+      "pr_auc_ci": [
+        0.2231201761161588,
+        0.5305114180803701
+      ],
+      "prec_at_5fpr": 0.42424242424242425,
+      "fp_100_at_80rec": 44.02985074626866
+    },
+    "(B) Issue TF-IDF LogReg": {
+      "within_instance_auc": 0.5,
+      "within_instance_auc_ci": [
+        0.5,
+        0.5
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.684866635949419,
+      "roc_auc_ci": [
+        0.5546572301847875,
+        0.7989146545278619
+      ],
+      "pr_auc": 0.44967462586498635,
+      "pr_auc_ci": [
+        0.31462765589399966,
+        0.6225812847525372
+      ],
+      "prec_at_5fpr": 0.3870967741935484,
+      "fp_100_at_80rec": 38.43283582089552
+    },
+    "(C) Repo-Prior Baseline": {
+      "within_instance_auc": 0.5,
+      "within_instance_auc_ci": [
+        0.5,
+        0.5
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.5,
+      "roc_auc_ci": [
+        0.5,
+        0.5
+      ],
+      "pr_auc": 0.28544776119402987,
+      "pr_auc_ci": [
+        0.18959225557940754,
+        0.3907229155602761
+      ],
+      "prec_at_5fpr": 0.0,
+      "fp_100_at_80rec": 60.447761194029844,
+      "note": "Repo-prior yields constant prediction on unseen test repos."
+    },
+    "(D) Patch-Size Features LogReg": {
+      "within_instance_auc": 0.5108626392557153,
+      "within_instance_auc_ci": [
+        0.4321643963802741,
+        0.5860199912013254
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.5934913565077903,
+      "roc_auc_ci": [
+        0.5068301053541674,
+        0.6809155079620783
+      ],
+      "pr_auc": 0.38319666290445525,
+      "pr_auc_ci": [
+        0.22343571507304974,
+        0.5666291229148809
+      ],
+      "prec_at_5fpr": 0.5128205128205128,
+      "fp_100_at_80rec": 50.93283582089553
+    },
+    "(E) Combined A+B+D LogReg": {
+      "within_instance_auc": 0.6749657556949223,
+      "within_instance_auc_ci": [
+        0.5786946989160532,
+        0.7686443923553299
+      ],
+      "within_instance_n_instances": 24,
+      "roc_auc": 0.7212239116708477,
+      "roc_auc_ci": [
+        0.6495524122556742,
+        0.7998651222056278
+      ],
+      "pr_auc": 0.44393118818550653,
+      "pr_auc_ci": [
+        0.3297167243425726,
+        0.5753183353464043
+      ],
+      "prec_at_5fpr": 0.45714285714285713,
+      "fp_100_at_80rec": 33.582089552238806
+    }
+  }
+}

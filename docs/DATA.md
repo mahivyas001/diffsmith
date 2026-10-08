@@ -53,3 +53,48 @@ To prevent cross-repository data leakage between training and evaluation, splits
 - **LOSO was Leaky:** The original Leave-One-Submission-Out (LOSO) cross-validation shared `instance_id`s between training and held-out folds, yielding an artificially inflated mean AUC of `0.897`. The corrected instance-disjoint LOSO (excluding all instances in the test fold from training) yields a mean AUC of `0.492`, confirming that sharing issue instances creates severe data leakage.
 - **Test Set Constraints (32 Instances):** The held-out test split comprises 32 distinct instances across 3 unseen repositories (`matplotlib`, `xarray`, `seaborn`). 24 of these instances contain both resolved and unresolved patches necessary for within-instance evaluation.
 - **Confidence Intervals Overlap:** Bootstrap 95% confidence intervals overlap heavily across baseline models (e.g., Baseline A within-instance AUC `0.625 [0.540-0.704]` vs Combined E `0.675 [0.579-0.769]`), indicating that baselines cannot be strictly ranked with statistical significance on this test set size.
+
+---
+
+## 5. Phase 3 Relational Heuristics Evaluation & Controls
+
+- **Pre-Registered Success Bar Status:** `bar NOT met`
+  - Val Within-Instance AUC: `0.505` (Target >= 0.70)
+  - Test 95% CI Lower Bound: `0.409` (Target > 0.50)
+  - Control (i) LSGO Within-Instance AUC: `0.000` (Target > 0.50)
+- **Model Performance Summary (Test Set):**
+  - H2 (All Rule Features): Within-Inst AUC = `0.503` [0.409-0.592]
+  - H3 (H2 + Baseline D): Within-Inst AUC = `0.502` [0.408-0.599]
+- **Agent Fingerprinting Controls:**
+  - Submission Origin Prediction Accuracy: `12.3%` vs Chance `5.6%`
+  - LSGO Within-Instance AUC (H2): `0.000` vs Baseline A `0.000`
+---
+
+## 5. Phase 3 Relational Heuristics Evaluation & Controls
+
+- **Pre-Registered Success Bar Status:** `bar NOT met`
+  - Val Within-Instance AUC: `0.505` (target >= 0.70)
+  - Test 95% CI Lower Bound: `0.409` (target > 0.50)
+  - Control (i) LSGO Within-Instance AUC: `0.502` (target > 0.50)
+- **Model Performance Summary (Test Set):**
+  - H2 (All Rule Features): Within-Inst AUC = `0.503` [0.409-0.592]
+  - H3 (H2 + Baseline D): Within-Inst AUC = `0.502` [0.408-0.599]
+- **Agent Fingerprinting Controls:**
+  - Submission Origin Prediction Accuracy: `12.3%` vs Chance `5.6%`
+  - 3-Fold LSGO Within-Instance AUC (H2): `0.502` | Baseline A: `0.670`
+  - Note: Per-submission instance-disjoint LSGO is degenerate in this dataset (all instance_ids appear in all submissions).
+---
+
+## 5. Phase 3 Relational Heuristics Evaluation & Controls
+
+- **Pre-Registered Success Bar Status:** `bar NOT met`
+  - Val Within-Instance AUC: `0.505` (target >= 0.70)
+  - Test 95% CI Lower Bound: `0.409` (target > 0.50)
+  - Control (i) LSGO Within-Instance AUC: `0.502` (target > 0.50)
+- **Model Performance Summary (Test Set):**
+  - H2 (All Rule Features): Within-Inst AUC = `0.503` [0.409-0.592]
+  - H3 (H2 + Baseline D): Within-Inst AUC = `0.502` [0.408-0.599]
+- **Agent Fingerprinting Controls:**
+  - Submission Origin Prediction Accuracy: `12.3%` vs Chance `5.6%`
+  - 3-Fold LSGO Within-Instance AUC (H2): `0.502` | Baseline A: `0.670`
+  - Note: Per-submission instance-disjoint LSGO is degenerate in this dataset (all instance_ids appear in all submissions).

@@ -1,18 +1,20 @@
-No relational heuristic or patch feature has genuine within-instance predictive signal; touched file paths alone drive all non-trivial performance.
+No tested feature shows within-instance signal distinguishable from chance under the agent-disjoint control (all 95% CIs include 0.5); Baseline A's standard-split 0.625 largely reflects agent formatting.
 
 # Phase 3c Control Experiments & Sensitivity Diagnostics
 
 ## 1. Summary Verdict
 
-> **Verdict:** No relational heuristic or patch feature has genuine within-instance predictive signal; touched file paths alone drive all non-trivial performance.
+> **Verdict:** No tested feature shows within-instance signal distinguishable from chance under the agent-disjoint control (all 95% CIs include 0.5); Baseline A's standard-split 0.625 largely reflects agent formatting.
 
 ## 2. Pre-Registered Success Bar Wording Rewrite & Loophole Analysis
 
 - **Corrected Criterion 3 Definition:** Requires the **95% confidence interval lower bound** under the agent-disjoint control to strictly exceed `0.50` (`Control (i) CI lower bound > 0.50`).
-- **Loophole Explanation:** The previous wording (`Control (i) mean within-instance AUC > 0.50`) was a statistical loophole because a mean AUC of `0.502` with a 95% confidence interval spanning `[0.420, 0.580]` is completely indistinguishable from random noise (0.50). Requiring `CI lower bound > 0.50` ensures statistically significant discrimination.
+- **Loophole Explanation:** The previous wording (`Control (i) mean within-instance AUC > 0.50`) was a statistical loophole because a mean AUC slightly above 0.50 with a 95% confidence interval encompassing 0.50 (e.g. H2 Control (i) combined AUC `0.480 [0.386-0.576]`) is completely indistinguishable from random noise (0.50). Requiring `CI lower bound > 0.50` ensures statistically significant discrimination.
 - **Stage 3b Record:** The Stage 3b result remains strictly recorded as `bar NOT met` (Val within-instance AUC = `0.505`, Test 95% CI = `[0.409, 0.592]`).
 
 ## 3. Agent-Disjoint Control (3-Fold Submission-Group CV Respecting Repo Split)
+
+> **Method & Variance Note:** Mean-of-folds test within-instance AUC and pooled test within-instance AUC differ (e.g., Baseline A3: `0.580` mean-of-folds vs `0.500 [0.406-0.611]` pooled). Each fold evaluates within-instance AUC on only ~8 multi-label test instances (24 test multi-label instances total across 3 folds), making per-fold estimates small and noisy. Furthermore, pooling predictions across 3 models trained on different submission subsets introduces calibration shifts in score scale. Crucially, under both metrics, all 95% confidence intervals encompass 0.50.
 
 | Model | Val Within-Inst AUC (Mean) | Test Within-Inst AUC (Mean) | Test Per-Fold AUCs | Test Combined AUC (95% CI) |
 |---|---|---|---|---|
@@ -58,7 +60,7 @@ No relational heuristic or patch feature has genuine within-instance predictive 
 
 ## 6. Sign Check (Direction Fixed on Train Only)
 
-| Feature Name | Train learned Coef | Val Within-Instance AUC | Test Within-Instance AUC | Direction Interpretation |
+| Feature Name | Train Learned Coef (Global Correlation) | Val Within-Instance AUC | Test Within-Instance AUC | Separate Direction Interpretation (Train vs Within-Instance) |
 |---|---|---|---|---|
-| `scope_creep_count` | `-0.1232` | `0.472` | `0.417` | Negative correlation (Scope creep associated with resolved patches) |
-| `fraction_touched_named` | `+0.4599` | `0.480` | `0.461` | Positive train slope yields <0.50 within-instance AUC |
+| `scope_creep_count` | `-0.1232` | `0.472` | `0.417` | Train correlation: negative coef (-0.1232, more scope creep -> lower train resolved rate) | Within-instance direction: Val AUC 0.472 / Test AUC 0.417 (< 0.50, patches with MORE scope creep rank HIGHER within an instance) |
+| `fraction_touched_named` | `+0.4599` | `0.480` | `0.461` | Train correlation: positive coef (+0.4599, higher fraction touched named -> higher train resolved rate) | Within-instance direction: Val AUC 0.480 / Test AUC 0.461 (< 0.50, patches touching higher fraction of named files rank LOWER within an instance) |

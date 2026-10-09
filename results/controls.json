@@ -1,5 +1,5 @@
 {
-  "verdict": "No relational heuristic or patch feature has genuine within-instance predictive signal; touched file paths alone drive all non-trivial performance.",
+  "verdict": "No tested feature shows within-instance signal distinguishable from chance under the agent-disjoint control (all 95% CIs include 0.5); Baseline A's standard-split 0.625 largely reflects agent formatting.",
   "standard_split_text_baselines": {
     "Baseline_A2_BodyText": {
       "val_within_auc": 0.5488297704020743,

@@ -98,3 +98,31 @@ To prevent cross-repository data leakage between training and evaluation, splits
   - Submission Origin Prediction Accuracy: `12.3%` vs Chance `5.6%`
   - 3-Fold LSGO Within-Instance AUC (H2): `0.502` | Baseline A: `0.670`
   - Note: Per-submission instance-disjoint LSGO is degenerate in this dataset (all instance_ids appear in all submissions).
+---
+
+## 6. Phase 3c Control Experiments & Sensitivity Diagnostics
+
+- **Verdict:** No relational heuristic or patch feature has genuine within-instance predictive signal; touched file paths alone drive all non-trivial performance.
+- **Agent-Disjoint 3-Fold Submission-Group CV Results (Test Set):**
+  - Model H2 (All Rule Features): `0.487`
+  - Model H3 (H2 + Baseline D): `0.473`
+  - Baseline A (Patch TF-IDF): `0.501`
+  - Baseline E (Combined A+B+D): `0.578`
+  - Baseline A2 (Body-Only Text): `0.517`
+  - Baseline A3 (Touched Paths Only): `0.580`
+- **Key Finding:** Baseline A3 (touched file paths alone) achieves `0.580` within-instance AUC under agent-disjoint control, confirming that file selection drives all genuine predictive signal, whereas fine-grained patch heuristics provide zero within-instance lift (`0.487`).
+- **H2 Tied Pair Diagnostics:** `12.5%` of positive-negative patch pairs in H2 test evaluation are tied (`138/1105`).
+---
+
+## 6. Phase 3c Control Experiments & Sensitivity Diagnostics
+
+- **Verdict:** No relational heuristic or patch feature has genuine within-instance predictive signal; touched file paths alone drive all non-trivial performance.
+- **Agent-Disjoint 3-Fold Submission-Group CV Results (Test Set):**
+  - Model H2 (All Rule Features): `0.487`
+  - Model H3 (H2 + Baseline D): `0.473`
+  - Baseline A (Patch TF-IDF): `0.501`
+  - Baseline E (Combined A+B+D): `0.578`
+  - Baseline A2 (Body-Only Text): `0.517`
+  - Baseline A3 (Touched Paths Only): `0.580`
+- **Key Finding:** Baseline A3 (touched file paths alone) achieves `0.580` within-instance AUC under agent-disjoint control, confirming that file selection drives all genuine predictive signal, whereas fine-grained patch heuristics provide zero within-instance lift (`0.487`).
+- **H2 Tied Pair Diagnostics:** `12.5%` of positive-negative patch pairs in H2 test evaluation are tied (`138/1105`).

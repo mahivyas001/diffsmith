@@ -1,0 +1,249 @@
+{
+  "verdict": "No relational heuristic or patch feature has genuine within-instance predictive signal; touched file paths alone drive all non-trivial performance.",
+  "standard_split_text_baselines": {
+    "Baseline_A2_BodyText": {
+      "val_within_auc": 0.5488297704020743,
+      "test_within_auc": 0.5594022345324429,
+      "test_ci": [
+        0.46376391512133697,
+        0.6444456527269027
+      ]
+    },
+    "Baseline_A3_TouchedPaths": {
+      "val_within_auc": 0.5782263416730329,
+      "test_within_auc": 0.6302052284589049,
+      "test_ci": [
+        0.566853268769629,
+        0.6918965108625035
+      ]
+    }
+  },
+  "control_1_agent_disjoint_3fold": {
+    "val_summary": {
+      "H2": {
+        "per_fold": [
+          0.4440145502645502,
+          0.5047569444444445,
+          0.511328125
+        ],
+        "mean_auc": 0.4866998732363316
+      },
+      "H3": {
+        "per_fold": [
+          0.5070436507936508,
+          0.5594097222222223,
+          0.5151041666666667
+        ],
+        "mean_auc": 0.5271858465608465
+      },
+      "Baseline A": {
+        "per_fold": [
+          0.5115079365079366,
+          0.5606944444444444,
+          0.4121527777777778
+        ],
+        "mean_auc": 0.494785052910053
+      },
+      "Baseline E": {
+        "per_fold": [
+          0.56005291005291,
+          0.6281944444444445,
+          0.49887152777777777
+        ],
+        "mean_auc": 0.5623729607583775
+      },
+      "Baseline A2": {
+        "per_fold": [
+          0.4886243386243387,
+          0.5775,
+          0.4447048611111111
+        ],
+        "mean_auc": 0.5036097332451499
+      },
+      "Baseline A3": {
+        "per_fold": [
+          0.6310185185185185,
+          0.5273263888888888,
+          0.5052083333333334
+        ],
+        "mean_auc": 0.5545177469135804
+      }
+    },
+    "test_summary": {
+      "H2": {
+        "per_fold": [
+          0.40972222222222215,
+          0.5151315789473685,
+          0.5372474747474747
+        ],
+        "mean_auc": 0.4873670919723551,
+        "overall_within_auc": 0.4798811553483735,
+        "ci": [
+          0.3855181488114622,
+          0.576164527633201
+        ]
+      },
+      "H3": {
+        "per_fold": [
+          0.40374999999999994,
+          0.5039473684210526,
+          0.5126262626262625
+        ],
+        "mean_auc": 0.473441210349105,
+        "overall_within_auc": 0.48887174519833837,
+        "ci": [
+          0.39108183969205723,
+          0.5861589298189328
+        ]
+      },
+      "Baseline A": {
+        "per_fold": [
+          0.5572222222222222,
+          0.606578947368421,
+          0.34015151515151515
+        ],
+        "mean_auc": 0.5013175615807194,
+        "overall_within_auc": 0.5136353904583072,
+        "ci": [
+          0.41137336308560263,
+          0.6149912505511463
+        ]
+      },
+      "Baseline E": {
+        "per_fold": [
+          0.6075,
+          0.6956140350877194,
+          0.43106060606060603
+        ],
+        "mean_auc": 0.5780582137161084,
+        "overall_within_auc": 0.5820724414474414,
+        "ci": [
+          0.46747112985394235,
+          0.6835942688677062
+        ]
+      },
+      "Baseline A2": {
+        "per_fold": [
+          0.5434722222222222,
+          0.5756578947368421,
+          0.43333333333333335
+        ],
+        "mean_auc": 0.5174878167641326,
+        "overall_within_auc": 0.5458776129349046,
+        "ci": [
+          0.45415467670350484,
+          0.6288984719225604
+        ]
+      },
+      "Baseline A3": {
+        "per_fold": [
+          0.6220833333333332,
+          0.5539473684210525,
+          0.5625
+        ],
+        "mean_auc": 0.5795102339181285,
+        "overall_within_auc": 0.4998038544607171,
+        "ci": [
+          0.4064323460926555,
+          0.611495428803563
+        ]
+      }
+    }
+  },
+  "tie_diagnostics": {
+    "feature_variance": {
+      "fraction_touched_named": {
+        "varying_instances": 15,
+        "total_instances": 32,
+        "percentage": 46.875
+      },
+      "any_named_untouched": {
+        "varying_instances": 1,
+        "total_instances": 32,
+        "percentage": 3.125
+      },
+      "issue_identifier_overlap_frac": {
+        "varying_instances": 31,
+        "total_instances": 32,
+        "percentage": 96.875
+      },
+      "literal_hardcoding_count": {
+        "varying_instances": 25,
+        "total_instances": 32,
+        "percentage": 78.125
+      },
+      "has_literal_hardcoding": {
+        "varying_instances": 25,
+        "total_instances": 32,
+        "percentage": 78.125
+      },
+      "special_casing_count": {
+        "varying_instances": 3,
+        "total_instances": 32,
+        "percentage": 9.375
+      },
+      "has_special_casing": {
+        "varying_instances": 3,
+        "total_instances": 32,
+        "percentage": 9.375
+      },
+      "swallowed_exception_count": {
+        "varying_instances": 4,
+        "total_instances": 32,
+        "percentage": 12.5
+      },
+      "has_swallowed_exception": {
+        "varying_instances": 4,
+        "total_instances": 32,
+        "percentage": 12.5
+      },
+      "test_tampering_count": {
+        "varying_instances": 1,
+        "total_instances": 32,
+        "percentage": 3.125
+      },
+      "has_test_tampering": {
+        "varying_instances": 1,
+        "total_instances": 32,
+        "percentage": 3.125
+      },
+      "suppression_marker_count": {
+        "varying_instances": 1,
+        "total_instances": 32,
+        "percentage": 3.125
+      },
+      "has_suppression_marker": {
+        "varying_instances": 1,
+        "total_instances": 32,
+        "percentage": 3.125
+      },
+      "scope_creep_count": {
+        "varying_instances": 25,
+        "total_instances": 32,
+        "percentage": 78.125
+      },
+      "scope_creep_fraction": {
+        "varying_instances": 24,
+        "total_instances": 32,
+        "percentage": 75.0
+      }
+    },
+    "h2_tied_pairs": {
+      "total_pos_neg_pairs": 1105,
+      "tied_pairs": 138,
+      "tied_percentage": 12.48868778280543
+    }
+  },
+  "sign_check": {
+    "scope_creep_count": {
+      "train_coef": -0.12323391931474913,
+      "val_within_auc": 0.4720684217743041,
+      "test_within_auc": 0.4170914852440588
+    },
+    "fraction_touched_named": {
+      "train_coef": 0.45992002716997554,
+      "val_within_auc": 0.4797593966037594,
+      "test_within_auc": 0.46059458226278077
+    }
+  }
+}

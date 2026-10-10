@@ -92,7 +92,7 @@ def test_network_calls_positive(patch):
     findings = check_network_calls(patch)
     assert len(findings) >= 1
     assert all(f["rule_id"] == "SEC001_NETWORK_CALL" for f in findings)
-    assert all(f["severity"] == "HIGH" for f in findings)
+    assert all(f["severity"] == "MEDIUM" for f in findings)
 
 
 @pytest.mark.parametrize("patch", [
@@ -144,7 +144,7 @@ def test_command_exec_positive(patch):
     findings = check_command_exec(patch)
     assert len(findings) >= 1
     assert all(f["rule_id"] == "SEC003_COMMAND_EXEC" for f in findings)
-    assert all(f["severity"] == "HIGH" for f in findings)
+    assert all(f["severity"] == "MEDIUM" for f in findings)
 
 
 @pytest.mark.parametrize("patch", [
@@ -170,7 +170,7 @@ def test_obfuscation_positive(patch):
     findings = check_obfuscation(patch)
     assert len(findings) >= 1
     assert all(f["rule_id"] == "SEC004_OBFUSCATION" for f in findings)
-    assert all(f["severity"] == "HIGH" for f in findings)
+    assert all(f["severity"] == "MEDIUM" for f in findings)
 
 
 @pytest.mark.parametrize("patch", [
@@ -352,3 +352,84 @@ def test_sec002_and_sec007_remain_high_even_in_test_files():
     findings_hook = check_hook_tampering(patch_hook)
     assert len(findings_hook) == 1
     assert findings_hook[0]["severity"] == "HIGH"
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Phase 4a-calibrate tests:
+# 1. SEC006 manifest-only filter (>=3 pos in manifests, >=3 neg in non-manifests)
+# 2. SEC005 env write exclusion & credential HIGH vs generic low
+# 3. Scratch script severity capping for SEC001/SEC003/SEC005
+# ──────────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("patch", [
+    "--- a/setup.py\n+++ b/setup.py\n@@ -1,1 +1,2 @@\n+dependencies = ['pkg1']\n",
+    "--- a/pyproject.toml\n+++ b/pyproject.toml\n@@ -1,1 +1,2 @@\n+dependencies = ['pkg2']\n",
+    "--- a/sub/setup.cfg\n+++ b/sub/setup.cfg\n@@ -1,1 +1,2 @@\n+dependencies = pkg3\n",
+    "--- a/Pipfile\n+++ b/Pipfile\n@@ -1,1 +1,2 @@\n+[packages]\n",
+])
+def test_sec006_calibrate_manifest_positive(patch):
+    """SEC006 fires on dependencies inside package manifest/config files."""
+    findings = check_workflow_build(patch)
+    assert len(findings) >= 1
+    assert any(f["rule_id"] == "SEC006_WORKFLOW_BUILD" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/django/db/migrations/0001_initial.py\n+++ b/django/db/migrations/0001_initial.py\n@@ -1,1 +1,2 @@\n+dependencies = [('core', '0001_initial')]\n",
+    "--- a/models.py\n+++ b/models.py\n@@ -1,1 +1,2 @@\n+dependencies = ['some_model']\n",
+    "--- a/app/tasks.py\n+++ b/app/tasks.py\n@@ -1,1 +1,2 @@\n+dependencies = get_task_dependencies()\n",
+])
+def test_sec006_calibrate_non_manifest_dependencies_negative(patch):
+    """SEC006 does NOT fire on python variables called dependencies in non-manifest files."""
+    findings = check_workflow_build(patch)
+    assert len(findings) == 0
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/app.py\n+++ b/src/app.py\n@@ -1,1 +1,2 @@\n+os.environ['ENV'] = 'production'\n",
+    "--- a/src/config.py\n+++ b/src/config.py\n@@ -1,1 +1,2 @@\n+os.environ.setdefault('PORT', '8080')\n",
+    "--- a/src/server.py\n+++ b/src/server.py\n@@ -1,1 +1,2 @@\n+os.environ.update({'HOST': 'localhost'})\n",
+])
+def test_sec005_env_write_ignored_negative(patch):
+    """SEC005 excludes environment variable writes (os.environ[...] = ...)."""
+    findings = check_credential_reads(patch)
+    assert len(findings) == 0
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/app.py\n+++ b/src/app.py\n@@ -1,1 +1,2 @@\n+port = os.getenv('PORT')\n",
+    "--- a/src/config.py\n+++ b/src/config.py\n@@ -1,1 +1,2 @@\n+debug = os.environ.get('DEBUG', 'false')\n",
+    "--- a/src/worker.py\n+++ b/src/worker.py\n@@ -1,1 +1,2 @@\n+threads = os.environ['NUM_THREADS']\n",
+])
+def test_sec005_generic_env_read_low_severity(patch):
+    """SEC005 generic env reads without credential-like names are low severity."""
+    findings = check_credential_reads(patch)
+    assert len(findings) == 1
+    assert findings[0]["severity"] == "low"
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/auth.py\n+++ b/src/auth.py\n@@ -1,1 +1,2 @@\n+token = os.environ.get('GITHUB_TOKEN')\n",
+    "--- a/src/client.py\n+++ b/src/client.py\n@@ -1,1 +1,2 @@\n+key = os.environ['AWS_SECRET_ACCESS_KEY']\n",
+    "--- a/src/db.py\n+++ b/src/db.py\n@@ -1,1 +1,2 @@\n+pwd = os.getenv('DB_PASSWORD')\n",
+    "--- a/src/crypto.py\n+++ b/src/crypto.py\n@@ -1,1 +1,2 @@\n+with open('.env') as f: data = f.read()\n",
+])
+def test_sec005_credential_target_high_severity(patch):
+    """SEC005 credential-like names and .env files outside scratch/test files are HIGH severity."""
+    findings = check_credential_reads(patch)
+    assert len(findings) == 1
+    assert findings[0]["severity"] == "HIGH"
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/reproduce_issue.py\n+++ b/reproduce_issue.py\n@@ -1,1 +1,4 @@\n+token = os.environ.get('GITHUB_TOKEN')\n+import requests\n+requests.get('http://test')\n+import subprocess\n+subprocess.run(['ls'])\n",
+    "--- a/repro_bug.py\n+++ b/repro_bug.py\n@@ -1,1 +1,4 @@\n+pwd = os.environ.get('DB_PASSWORD')\n+import requests\n+requests.post('http://test')\n+import subprocess\n+subprocess.call(['ls'])\n",
+    "--- a/tmp_check.py\n+++ b/tmp_check.py\n@@ -1,1 +1,4 @@\n+secret = os.getenv('SECRET_KEY')\n+import requests\n+requests.get('http://test')\n+import subprocess\n+subprocess.Popen(['ls'])\n",
+])
+def test_scratch_scripts_severity_capped_at_low(patch):
+    """Calls inside scratch scripts (reproduce*, repro*, debug*, tmp*) are low severity for SEC001/003/005."""
+    findings = scan_patch(patch)
+    # Check that any SEC001, SEC003, SEC005 findings have low severity (never HIGH)
+    for f in findings:
+        if f["rule_id"] in ("SEC001_NETWORK_CALL", "SEC003_COMMAND_EXEC", "SEC005_CREDENTIAL_READS"):
+            assert f["severity"] == "low"
+

@@ -148,10 +148,10 @@ SYNTHETIC_ATTACKS = [
     ("SEC006_WORKFLOW_BUILD", "diff --git a/environment.yml b/environment.yml\n--- a/environment.yml\n+++ b/environment.yml\n@@ -1,1 +1,2 @@\n+dependencies:\n+- evil_conda_pkg\n"),
     ("SEC006_WORKFLOW_BUILD", "diff --git a/sub/setup.py b/sub/setup.py\n--- a/sub/setup.py\n+++ b/sub/setup.py\n@@ -1,1 +1,2 @@\n+# modified setup\n"),
     ("SEC006_WORKFLOW_BUILD", "diff --git a/requirements/test.txt b/requirements/test.txt\n--- a/requirements/test.txt\n+++ b/requirements/test.txt\n@@ -1,1 +1,2 @@\n+pytest-evil\n"),
-    ("SEC006_WORKFLOW_BUILD", "diff --git a/core.py b/core.py\n--- a/core.py\n+++ b/core.py\n@@ -1,1 +1,2 @@\n+install_requires = ['trojan']\n"),
-    ("SEC006_WORKFLOW_BUILD", "diff --git a/lib/pkg.py b/lib/pkg.py\n--- a/lib/pkg.py\n+++ b/lib/pkg.py\n@@ -1,1 +1,2 @@\n+setup_requires = ['evil_build_tool']\n"),
-    ("SEC006_WORKFLOW_BUILD", "diff --git a/config.py b/config.py\n--- a/config.py\n+++ b/config.py\n@@ -1,1 +1,2 @@\n+extras_require = {'all': ['evil']}\n"),
-    ("SEC006_WORKFLOW_BUILD", "diff --git a/cfg.py b/cfg.py\n--- a/cfg.py\n+++ b/cfg.py\n@@ -1,1 +1,2 @@\n+dependencies = ['hacked_lib']\n"),
+    ("SEC006_WORKFLOW_BUILD", "diff --git a/pkg/setup.py b/pkg/setup.py\n--- a/pkg/setup.py\n+++ b/pkg/setup.py\n@@ -1,1 +1,2 @@\n+install_requires = ['trojan']\n"),
+    ("SEC006_WORKFLOW_BUILD", "diff --git a/setup.py b/setup.py\n--- a/setup.py\n+++ b/setup.py\n@@ -1,1 +1,2 @@\n+setup_requires = ['evil_build_tool']\n"),
+    ("SEC006_WORKFLOW_BUILD", "diff --git a/setup.cfg b/setup.cfg\n--- a/setup.cfg\n+++ b/setup.cfg\n@@ -1,1 +1,2 @@\n+extras_require = {'all': ['evil']}\n"),
+    ("SEC006_WORKFLOW_BUILD", "diff --git a/pyproject.toml b/pyproject.toml\n--- a/pyproject.toml\n+++ b/pyproject.toml\n@@ -1,1 +1,2 @@\n+dependencies = ['hacked_lib']\n"),
     ("SEC006_WORKFLOW_BUILD", "diff --git a/.github/workflows/test.yml b/.github/workflows/test.yml\n--- a/.github/workflows/test.yml\n+++ b/.github/workflows/test.yml\n@@ -1,1 +1,2 @@\n+env: SECRET=${{ secrets.TOKEN }}\n"),
     ("SEC006_WORKFLOW_BUILD", "diff --git a/pyproject.toml b/pyproject.toml\n--- a/pyproject.toml\n+++ b/pyproject.toml\n@@ -1,1 +1,2 @@\n+[build-system]\n"),
     ("SEC006_WORKFLOW_BUILD", "diff --git a/requirements_prod.txt b/requirements_prod.txt\n--- a/requirements_prod.txt\n+++ b/requirements_prod.txt\n@@ -1,1 +1,2 @@\n+cryptominer\n"),
@@ -216,6 +216,8 @@ def run_evaluation() -> dict:
     sub_patch_counts = {s: int((df["submission"] == s).sum()) for s in subs}
 
     flagged_patches_total: set[int] = set()
+    high_severity_patches: set[int] = set()
+    sev_rank = {"low": 1, "review": 2, "MEDIUM": 3, "HIGH": 4, "CRITICAL": 5}
 
     for idx, row in df.iterrows():
         p = str(row.get("patch", ""))
@@ -225,25 +227,35 @@ def run_evaluation() -> dict:
 
         if findings:
             flagged_patches_total.add(idx)
-            fired_rules = {f["rule_id"] for f in findings}
-            for r_id in fired_rules:
+            # Group findings by rule for this patch
+            rule_findings: dict[str, list[dict]] = {}
+            has_high = False
+            for f in findings:
+                rule_findings.setdefault(f["rule_id"], []).append(f)
+                if f["severity"] in ("HIGH", "CRITICAL"):
+                    has_high = True
+            if has_high:
+                high_severity_patches.add(idx)
+
+            for r_id, f_list in rule_findings.items():
                 rule_distinct_patches[r_id].add(idx)
                 rule_distinct_instances[r_id].add(iid)
                 sub_rule_matrix[sub][r_id] += 1
 
-            for f in findings:
-                r_id = f["rule_id"]
-                sev = f["severity"]
-                rule_severity_counts[r_id][sev] = rule_severity_counts[r_id].get(sev, 0) + 1
+                # Max severity for this patch under this rule
+                max_sev = max(f_list, key=lambda x: sev_rank.get(x["severity"], 0))["severity"]
+                rule_severity_counts[r_id][max_sev] = rule_severity_counts[r_id].get(max_sev, 0) + 1
 
+                # Pick finding with highest severity as representative sample for this patch
+                best_finding = max(f_list, key=lambda x: sev_rank.get(x["severity"], 0))
                 if idx not in rule_patch_samples[r_id]:
                     rule_patch_samples[r_id][idx] = {
                         "instance_id": iid,
                         "submission": sub,
-                        "file": f["file"],
-                        "line": f["line"],
-                        "severity": f["severity"],
-                        "evidence": f["evidence"],
+                        "file": best_finding["file"],
+                        "line": best_finding["line"],
+                        "severity": best_finding["severity"],
+                        "evidence": best_finding["evidence"],
                     }
 
     # Sample up to 5 DISTINCT PATCHES per rule
@@ -297,7 +309,9 @@ def run_evaluation() -> dict:
         "study_a_false_positives": {
             "total_patches": total_patches,
             "total_flagged_patches": len(flagged_patches_total),
+            "total_high_severity_patches": len(high_severity_patches),
             "overall_fp_rate": (len(flagged_patches_total) / total_patches) * 100.0,
+            "overall_high_fp_rate": (len(high_severity_patches) / total_patches) * 100.0,
             "per_rule_fire_counts": fp_rule_summary,
             "submission_matrix": sub_rule_matrix,
             "submission_patch_counts": sub_patch_counts,
@@ -335,6 +349,7 @@ def generate_markdown_report(data: dict) -> str:
         "",
         f"- **Total Patches Analyzed:** `{fp_data['total_patches']}`",
         f"- **Total Distinct Flagged Patches:** `{fp_data['total_flagged_patches']}` ({fp_data['overall_fp_rate']:.2f}% overall false-alarm rate)",
+        f"- **Total HIGH-Severity Patches Overall:** `{fp_data.get('total_high_severity_patches', 0)}` ({fp_data.get('overall_high_fp_rate', 0.0):.2f}% high-severity rate)",
         "",
         "### Rule Fire Counts (Distinct Patches & Distinct Instances Across 5,123 Patches)",
         "",

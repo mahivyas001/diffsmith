@@ -3,7 +3,7 @@ src/diffsmith/safety/command_exec.py — Rule 3: Detect subprocess, os.system, e
 """
 
 import re
-from .safety_utils import extract_added_lines, extract_context_lines, is_test_file
+from .safety_utils import extract_added_lines, extract_context_lines, is_test_file, is_scratch_script
 
 RULE_ID = "SEC003_COMMAND_EXEC"
 
@@ -31,10 +31,12 @@ def check_command_exec(patch_text: str) -> list[dict]:
             if pattern.search(line_info.content):
                 file_ctx = context_map.get(line_info.file_path, [])
                 is_modifying_existing = any(pattern.search(ctx_line) for ctx_line in file_ctx)
-                if is_test_file(line_info.file_path) or is_modifying_existing:
+                in_scratch_or_test = is_test_file(line_info.file_path) or is_scratch_script(line_info.file_path)
+
+                if in_scratch_or_test or is_modifying_existing:
                     sev = "low"
                 else:
-                    sev = "HIGH"
+                    sev = "MEDIUM"
 
                 findings.append({
                     "rule_id": RULE_ID,

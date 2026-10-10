@@ -6,7 +6,7 @@ import re
 from typing import NamedTuple
 
 VENDORED_DIR_RE = re.compile(
-    r"(?:^|[/\\])(?:venv|\.venv|site-packages|node_modules|\.git)(?:[/\\]|$)",
+    r"(?:^|[/\\])(?:venv|\.venv|site-packages|node_modules)(?:[/\\]|$)",
     re.IGNORECASE,
 )
 
@@ -26,8 +26,6 @@ def is_vendored_path(path: str) -> bool:
     if not path or not isinstance(path, str):
         return False
     clean = path.replace("\\", "/")
-    if clean.startswith(".git/hooks/") or "/.git/hooks/" in clean:
-        return False
     return bool(VENDORED_DIR_RE.search(clean))
 
 

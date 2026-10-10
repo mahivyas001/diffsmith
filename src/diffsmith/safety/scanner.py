@@ -10,6 +10,7 @@ from .obfuscation import check_obfuscation
 from .credential_reads import check_credential_reads
 from .workflow_build import check_workflow_build
 from .hook_tampering import check_hook_tampering
+from .dynamic_access import check_dynamic_access
 
 ALL_RULES = [
     ("vendored_directory_added", check_vendored_paths),
@@ -21,6 +22,7 @@ ALL_RULES = [
     ("SEC005_CREDENTIAL_READS", check_credential_reads),
     ("SEC006_WORKFLOW_BUILD", check_workflow_build),
     ("SEC007_HOOK_TAMPERING", check_hook_tampering),
+    ("SEC008_DYNAMIC_ACCESS", check_dynamic_access),
 ]
 
 

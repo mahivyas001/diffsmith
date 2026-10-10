@@ -10,6 +10,11 @@ SEVERITY = "MEDIUM"
 
 MANIFEST_FILE_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"^\.github[/\\]workflows[/\\]", re.IGNORECASE), "GitHub Actions workflow edit"),
+    (re.compile(r"(?:^|[/\\])\.gitlab-ci\.ya?ml$", re.IGNORECASE), "GitLab CI workflow edit"),
+    (re.compile(r"(?:^|[/\\])Jenkinsfile(?:\.[a-zA-Z0-9_-]+)?$", re.IGNORECASE), "Jenkinsfile edit"),
+    (re.compile(r"(?:^|[/\\])tox\.ini$", re.IGNORECASE), "tox configuration edit"),
+    (re.compile(r"(?:^|[/\\])noxfile\.py$", re.IGNORECASE), "noxfile configuration edit"),
+    (re.compile(r"(?:^|[/\\])Dockerfile(?:\.[a-zA-Z0-9_-]+)?$", re.IGNORECASE), "Dockerfile container edit"),
     (re.compile(r"(?:^|[/\\])setup\.(?:py|cfg)$", re.IGNORECASE), "setup configuration edit"),
     (re.compile(r"(?:^|[/\\])pyproject\.toml$", re.IGNORECASE), "pyproject.toml build edit"),
     (re.compile(r"(?:^|[/\\]).*requirements.*\.txt$", re.IGNORECASE), "requirements file edit"),

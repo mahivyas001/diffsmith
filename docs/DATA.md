@@ -110,7 +110,7 @@ To prevent cross-repository data leakage between training and evaluation, splits
   - Baseline E (Combined A+B+D): `0.578`
   - Baseline A2 (Body-Only Text): `0.517`
   - Baseline A3 (Touched Paths Only): `0.580`
-- **Key Finding:** Baseline A3 (touched file paths alone) achieves `0.580` within-instance AUC under agent-disjoint control, confirming that file selection drives all genuine predictive signal, whereas fine-grained patch heuristics provide zero within-instance lift (`0.487`).
+- **Key Finding:** Baseline A3 (touched paths) scored 0.580 mean-of-folds but 0.500 pooled [0.406-0.611]; not distinguishable from chance. Heuristic features scored 0.487 (H2).
 - **H2 Tied Pair Diagnostics:** `12.5%` of positive-negative patch pairs in H2 test evaluation are tied (`138/1105`).
 
 ---
@@ -118,6 +118,7 @@ To prevent cross-repository data leakage between training and evaluation, splits
 ## 7. Phase 4 Safety Rule Calibration & Severity Mapping
 
 To maintain high precision without excessive false alarms on benign agent-generated patches:
+- Zero HIGH findings on the 5,123 real patches was reached after tuning on this same set; it is not a held-out false-alarm estimate.
 - **Severity Aggregation:** Severity counts in reports are evaluated strictly per patch per rule (maximum severity across findings for that patch/rule pair), rather than per raw finding line.
 - **HIGH Severity Rules:** Only the following high-risk findings may produce `HIGH` severity:
   1. `SEC002` (pipe to shell: `curl | sh`, `wget | bash`).

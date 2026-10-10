@@ -119,6 +119,14 @@ CASES = [
 ]
 
 
+SEV_ORDER = {"CRITICAL": 5, "HIGH": 4, "MEDIUM": 3, "review": 2, "low": 1}
+
+
+def max_severity(findings):
+    sevs = [str(f.get("severity", "")) for f in findings]
+    return max(sevs, key=lambda x: SEV_ORDER.get(x, 0), default="none")
+
+
 def rule_matches(finding, prefix):
     return str(finding.get("rule_id", "")).startswith(prefix)
 
@@ -149,7 +157,8 @@ def main():
         got = sorted({str(f.get("rule_id", "")) for f in findings})
         hit_expected = exp is not None and any(rule_matches(f, exp) for f in findings)
         rows.append({"id": cid, "category": cat, "expected": exp, "fired": got,
-                     "hit_expected": hit_expected, "hit_any": bool(findings)})
+                     "hit_expected": hit_expected, "hit_any": bool(findings),
+                     "max_severity": max_severity(findings)})
 
     lines = ["# Independent security-scanner evaluation", "",
              "Cases were written separately from the rules. All payloads are inert strings.",
@@ -169,13 +178,18 @@ def main():
     misses = [r for r in rows if r["category"] in ("plain", "evasion") and not r["hit_expected"]]
     lines += ["", f"## Misses ({len(misses)})", ""]
     lines += [f"- `{r['id']}` ({r['category']}, expected {r['expected']}), fired: {r['fired'] or 'nothing'}" for r in misses]
+    caught = [r for r in rows if r["category"] in ("plain", "evasion") and r["hit_expected"]]
+    lines += ["", "## Severity of caught attacks", ""]
+    lines += [f"- `{r['id']}` ({r['category']}, {r['expected']}): {r['max_severity']}" for r in caught]
+    top = [r for r in caught if r["max_severity"] in ("HIGH", "CRITICAL")]
+    lines += ["", f"Caught attacks reported HIGH or CRITICAL: {len(top)} of {len(caught)}", ""]
     benign = [r for r in rows if r["category"] == "benign"]
     fps = [r for r in benign if r["hit_any"]]
     lines += ["", f"## False alarms on benign look-alikes: {len(fps)} of {len(benign)}", ""]
-    lines += [f"- `{r['id']}` fired {r['fired']}" for r in fps]
+    lines += [f"- `{r['id']}` fired {r['fired']} (max severity {r['max_severity']})" for r in fps]
     arg = [r for r in rows if r["category"] == "arguable"]
     lines += ["", "## Arguable cases (not counted as false alarms)", ""]
-    lines += [f"- `{r['id']}` fired {r['fired'] or 'nothing'}" for r in arg]
+    lines += [f"- `{r['id']}` fired {r['fired'] or 'nothing'} (max severity {r['max_severity']})" for r in arg]
     text = "\n".join(lines) + "\n"
     os.makedirs(os.path.join(ROOT, "results"), exist_ok=True)
     with open(os.path.join(ROOT, "results", "security_independent.md"), "w", encoding="utf-8") as f:

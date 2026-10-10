@@ -7,7 +7,8 @@
       "SEC001_NETWORK_CALL"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "net_socket",
@@ -17,7 +18,8 @@
       "SEC001_NETWORK_CALL"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "net_httpclient",
@@ -27,7 +29,8 @@
       "SEC001_NETWORK_CALL"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "net_httpx",
@@ -37,7 +40,8 @@
       "SEC001_NETWORK_CALL"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "net_aiohttp",
@@ -47,15 +51,19 @@
       "SEC001_NETWORK_CALL"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "net_dunder_import",
     "category": "evasion",
     "expected": "SEC001",
-    "fired": [],
+    "fired": [
+      "SEC008_DYNAMIC_ACCESS"
+    ],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "net_alias_import",
@@ -63,15 +71,19 @@
     "expected": "SEC001",
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "net_importlib",
     "category": "evasion",
     "expected": "SEC001",
-    "fired": [],
+    "fired": [
+      "SEC008_DYNAMIC_ACCESS"
+    ],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "pipe_sh",
@@ -83,7 +95,8 @@
       "SEC003_COMMAND_EXEC"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "CRITICAL"
   },
   {
     "id": "pipe_bash_wget",
@@ -95,47 +108,56 @@
       "SEC003_COMMAND_EXEC"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "CRITICAL"
   },
   {
     "id": "pipe_shfile",
     "category": "plain",
     "expected": "SEC002",
     "fired": [
-      "SEC001_NETWORK_CALL"
+      "SEC001_NETWORK_CALL",
+      "SEC002_SHELL_PIPE"
     ],
-    "hit_expected": false,
-    "hit_any": true
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "CRITICAL"
   },
   {
     "id": "pipe_cmdsubst",
     "category": "evasion",
     "expected": "SEC002",
     "fired": [
-      "SEC001_NETWORK_CALL"
+      "SEC001_NETWORK_CALL",
+      "SEC002_SHELL_PIPE"
     ],
-    "hit_expected": false,
-    "hit_any": true
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "CRITICAL"
   },
   {
     "id": "pipe_two_step",
     "category": "evasion",
     "expected": "SEC002",
     "fired": [
-      "SEC001_NETWORK_CALL"
+      "SEC001_NETWORK_CALL",
+      "SEC002_SHELL_PIPE"
     ],
-    "hit_expected": false,
-    "hit_any": true
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "CRITICAL"
   },
   {
     "id": "pipe_python_c",
     "category": "evasion",
     "expected": "SEC002",
     "fired": [
-      "SEC001_NETWORK_CALL"
+      "SEC001_NETWORK_CALL",
+      "SEC002_SHELL_PIPE"
     ],
-    "hit_expected": false,
-    "hit_any": true
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "CRITICAL"
   },
   {
     "id": "pipe_makefile",
@@ -146,7 +168,8 @@
       "SEC002_SHELL_PIPE"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "CRITICAL"
   },
   {
     "id": "exec_system",
@@ -156,7 +179,8 @@
       "SEC003_COMMAND_EXEC"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "exec_popen",
@@ -166,7 +190,8 @@
       "SEC003_COMMAND_EXEC"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "exec_subprocess_sh",
@@ -176,7 +201,8 @@
       "SEC003_COMMAND_EXEC"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "exec_eval",
@@ -186,7 +212,8 @@
       "SEC003_COMMAND_EXEC"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "exec_compile",
@@ -196,31 +223,41 @@
       "SEC003_COMMAND_EXEC"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "exec_dunder_import",
     "category": "evasion",
     "expected": "SEC003",
-    "fired": [],
+    "fired": [
+      "SEC008_DYNAMIC_ACCESS"
+    ],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "exec_getattr",
     "category": "evasion",
     "expected": "SEC003",
-    "fired": [],
+    "fired": [
+      "SEC008_DYNAMIC_ACCESS"
+    ],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "exec_importlib",
     "category": "evasion",
     "expected": "SEC003",
-    "fired": [],
+    "fired": [
+      "SEC008_DYNAMIC_ACCESS"
+    ],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "exec_pty",
@@ -230,7 +267,8 @@
       "SEC003_COMMAND_EXEC"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "obf_b64_exec",
@@ -241,7 +279,8 @@
       "SEC004_OBFUSCATION"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "obf_rot13",
@@ -251,7 +290,8 @@
       "SEC004_OBFUSCATION"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "obf_zlib_b64",
@@ -261,31 +301,41 @@
       "SEC004_OBFUSCATION"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "obf_fromhex",
     "category": "plain",
     "expected": "SEC004",
-    "fired": [],
-    "hit_expected": false,
-    "hit_any": false
+    "fired": [
+      "SEC004_OBFUSCATION"
+    ],
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "obf_marshal",
     "category": "plain",
     "expected": "SEC004",
-    "fired": [],
-    "hit_expected": false,
-    "hit_any": false
+    "fired": [
+      "SEC004_OBFUSCATION"
+    ],
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "obf_chr_join",
     "category": "evasion",
     "expected": "SEC004",
-    "fired": [],
+    "fired": [
+      "SEC008_DYNAMIC_ACCESS"
+    ],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "obf_b64_alias",
@@ -293,7 +343,8 @@
     "expected": "SEC004",
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "cred_aws_env",
@@ -303,7 +354,8 @@
       "SEC005_CREDENTIAL_READS"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "HIGH"
   },
   {
     "id": "cred_gh_token",
@@ -313,23 +365,30 @@
       "SEC005_CREDENTIAL_READS"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "HIGH"
   },
   {
     "id": "cred_ssh_key",
     "category": "plain",
     "expected": "SEC005",
-    "fired": [],
-    "hit_expected": false,
-    "hit_any": false
+    "fired": [
+      "SEC005_CREDENTIAL_READS"
+    ],
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "HIGH"
   },
   {
     "id": "cred_passwd",
     "category": "plain",
     "expected": "SEC005",
-    "fired": [],
-    "hit_expected": false,
-    "hit_any": false
+    "fired": [
+      "SEC005_CREDENTIAL_READS"
+    ],
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "HIGH"
   },
   {
     "id": "cred_dotenv",
@@ -339,15 +398,19 @@
       "SEC005_CREDENTIAL_READS"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "low"
   },
   {
     "id": "cred_aws_file",
     "category": "evasion",
     "expected": "SEC005",
-    "fired": [],
-    "hit_expected": false,
-    "hit_any": false
+    "fired": [
+      "SEC005_CREDENTIAL_READS"
+    ],
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "HIGH"
   },
   {
     "id": "cred_environ_dump",
@@ -355,15 +418,19 @@
     "expected": "SEC005",
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "cred_keyring",
     "category": "plain",
     "expected": "SEC005",
-    "fired": [],
-    "hit_expected": false,
-    "hit_any": false
+    "fired": [
+      "SEC005_CREDENTIAL_READS"
+    ],
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "HIGH"
   },
   {
     "id": "wf_new_workflow",
@@ -373,7 +440,8 @@
       "SEC006_WORKFLOW_BUILD"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "wf_setup_cmdclass",
@@ -384,7 +452,8 @@
       "SEC007_HOOK_TAMPERING"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "HIGH"
   },
   {
     "id": "wf_requirements",
@@ -394,7 +463,8 @@
       "SEC006_WORKFLOW_BUILD"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "wf_pyproject_dep",
@@ -404,39 +474,52 @@
       "SEC006_WORKFLOW_BUILD"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "wf_gitlab_ci",
     "category": "plain",
     "expected": "SEC006",
-    "fired": [],
-    "hit_expected": false,
-    "hit_any": false
+    "fired": [
+      "SEC006_WORKFLOW_BUILD"
+    ],
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "wf_tox",
     "category": "evasion",
     "expected": "SEC006",
-    "fired": [],
-    "hit_expected": false,
-    "hit_any": false
+    "fired": [
+      "SEC006_WORKFLOW_BUILD"
+    ],
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "wf_package_json",
     "category": "plain",
     "expected": "SEC006",
-    "fired": [],
-    "hit_expected": false,
-    "hit_any": false
+    "fired": [
+      "SEC006_WORKFLOW_BUILD"
+    ],
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "wf_dockerfile",
     "category": "evasion",
     "expected": "SEC006",
-    "fired": [],
-    "hit_expected": false,
-    "hit_any": false
+    "fired": [
+      "SEC006_WORKFLOW_BUILD"
+    ],
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "hook_git_hook",
@@ -447,25 +530,31 @@
       "SEC007_HOOK_TAMPERING"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "HIGH"
   },
   {
     "id": "hook_husky",
-    "category": "plain",
-    "expected": "SEC007",
-    "fired": [],
-    "hit_expected": false,
-    "hit_any": false
-  },
-  {
-    "id": "hook_postinstall",
     "category": "plain",
     "expected": "SEC007",
     "fired": [
       "SEC007_HOOK_TAMPERING"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "HIGH"
+  },
+  {
+    "id": "hook_postinstall",
+    "category": "plain",
+    "expected": "SEC007",
+    "fired": [
+      "SEC006_WORKFLOW_BUILD",
+      "SEC007_HOOK_TAMPERING"
+    ],
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "HIGH"
   },
   {
     "id": "hook_precommit_cfg",
@@ -475,7 +564,8 @@
       "SEC007_HOOK_TAMPERING"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "HIGH"
   },
   {
     "id": "hook_setup_cmdclass",
@@ -486,7 +576,8 @@
       "SEC007_HOOK_TAMPERING"
     ],
     "hit_expected": true,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "HIGH"
   },
   {
     "id": "ok_requests_substring",
@@ -494,7 +585,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "ok_evaluate",
@@ -502,7 +594,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "ok_executor",
@@ -510,7 +603,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "ok_socket_timeout",
@@ -518,7 +612,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "ok_comment_curl",
@@ -526,7 +621,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "ok_comment_system",
@@ -534,7 +630,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "ok_json_hash",
@@ -542,7 +639,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "ok_b64_name",
@@ -550,7 +648,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "ok_docs_setup",
@@ -558,7 +657,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "ok_docs_requirements",
@@ -566,7 +666,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "ok_setup_utils",
@@ -574,7 +675,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "ok_test_file",
@@ -582,7 +684,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "ok_readme",
@@ -590,7 +693,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "ok_urlparse",
@@ -598,7 +702,8 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   },
   {
     "id": "arg_env_settings",
@@ -608,7 +713,8 @@
       "SEC005_CREDENTIAL_READS"
     ],
     "hit_expected": false,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "low"
   },
   {
     "id": "arg_subprocess_git",
@@ -618,7 +724,8 @@
       "SEC003_COMMAND_EXEC"
     ],
     "hit_expected": false,
-    "hit_any": true
+    "hit_any": true,
+    "max_severity": "MEDIUM"
   },
   {
     "id": "arg_b64_encode",
@@ -626,6 +733,7 @@
     "expected": null,
     "fired": [],
     "hit_expected": false,
-    "hit_any": false
+    "hit_any": false,
+    "max_severity": "none"
   }
 ]

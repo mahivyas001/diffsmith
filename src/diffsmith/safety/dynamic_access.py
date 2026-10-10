@@ -1,26 +1,24 @@
 """
-src/diffsmith/safety/obfuscation.py — Rule 4: Detect base64 and obfuscated string decoding.
+src/diffsmith/safety/dynamic_access.py — Rule 8: Detect dynamic access (__import__, importlib, getattr(os/subprocess), chr join).
 """
 
 import re
 from .safety_utils import extract_added_lines, extract_context_lines, is_test_file, is_scratch_script
 
-RULE_ID = "SEC004_OBFUSCATION"
+RULE_ID = "SEC008_DYNAMIC_ACCESS"
 
-OBFUSCATION_PATTERNS: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"\bbase64\.(?:b64decode|standard_b64decode|urlsafe_b64decode|decodestring)\s*\("), "base64 decoding"),
-    (re.compile(r"(?<!\w)b64decode\s*\("), "b64decode invocation"),
-    (re.compile(r"\bbinascii\.(?:a2b_base64|unhexlify|a2b_hex)\s*\("), "binascii decoding"),
-    (re.compile(r"(?<!\w)unhexlify\s*\("), "unhexlify decoding"),
-    (re.compile(r"\bbytes\.fromhex\s*\("), "bytes.fromhex decoding"),
-    (re.compile(r"\bmarshal\.loads\s*\("), "marshal.loads code deserialization"),
-    (re.compile(r"\bcodecs\.decode\s*\(.*?['\"](?:rot_?13|base64|hex(?:_codec)?)['\"]", re.IGNORECASE), "codecs obfuscated decode"),
-    (re.compile(r"__import__\s*\(\s*['\"]base64['\"]\s*\)"), "dynamic base64 import"),
+DYNAMIC_ACCESS_PATTERNS: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"\b__import__\s*\("), "__import__() dynamic import invocation"),
+    (re.compile(r"\bimportlib\.import_module\s*\("), "importlib.import_module() dynamic import invocation"),
+    (re.compile(r"\bgetattr\s*\(\s*os\s*,"), "getattr(os, ...) dynamic attribute access"),
+    (re.compile(r"\bgetattr\s*\(\s*subprocess\s*,"), "getattr(subprocess, ...) dynamic attribute access"),
+    (re.compile(r"\.join\s*\(\s*\[?\s*chr\s*\("), "chr() string construction via join"),
+    (re.compile(r"\bchr\s*\([^)]+\)\s*\+\s*chr\s*\("), "chained chr() string construction"),
 ]
 
 
-def check_obfuscation(patch_text: str) -> list[dict]:
-    """Scan added diff lines for base64 or obfuscated string decoding."""
+def check_dynamic_access(patch_text: str) -> list[dict]:
+    """Scan added diff lines for dynamic import/execution access patterns."""
     findings = []
     added_lines = extract_added_lines(patch_text)
     context_map = extract_context_lines(patch_text)
@@ -30,7 +28,7 @@ def check_obfuscation(patch_text: str) -> list[dict]:
         if stripped.startswith("#"):
             continue
 
-        for pattern, desc in OBFUSCATION_PATTERNS:
+        for pattern, desc in DYNAMIC_ACCESS_PATTERNS:
             if pattern.search(line_info.content):
                 file_ctx = context_map.get(line_info.file_path, [])
                 is_modifying_existing = any(pattern.search(ctx_line) for ctx_line in file_ctx)

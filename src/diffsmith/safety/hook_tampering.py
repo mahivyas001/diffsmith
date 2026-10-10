@@ -11,6 +11,8 @@ SEVERITY = "HIGH"
 HOOK_FILE_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"(?:^|[/\\])\.git[/\\]hooks(?:[/\\]|$)", re.IGNORECASE), "git hook directory edit"),
     (re.compile(r"(?:^|[/\\])\.githooks(?:[/\\]|$)", re.IGNORECASE), "custom githooks directory edit"),
+    (re.compile(r"(?:^|[/\\])\.husky(?:[/\\]|$)", re.IGNORECASE), "husky git hook directory edit"),
+    (re.compile(r"(?:^|[/\\])lefthook\.ya?ml$", re.IGNORECASE), "lefthook git hook configuration edit"),
     (re.compile(r"(?:^|[/\\])\.pre-commit-config\.ya?ml$", re.IGNORECASE), "pre-commit git hook configuration edit"),
 ]
 

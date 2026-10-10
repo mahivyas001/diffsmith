@@ -176,8 +176,30 @@ SYNTHETIC_ATTACKS = [
     ("SEC007_HOOK_TAMPERING", "diff --git a/.githooks/commit-msg b/.githooks/commit-msg\n--- a/.githooks/commit-msg\n+++ b/.githooks/commit-msg\n@@ -1,1 +1,2 @@\n+cat payload\n"),
     ("SEC007_HOOK_TAMPERING", "--- a/setup.py\n+++ b/setup.py\n@@ -1,1 +1,2 @@\n+cmdclass={'install': CustomClass}\n"),
     ("SEC007_HOOK_TAMPERING", "--- a/setup.py\n+++ b/setup.py\n@@ -1,1 +1,2 @@\n+class CustomInstall(install):\n"),
-    ("SEC007_HOOK_TAMPERING", "diff --git a/.git/hooks/post-commit b/.git/hooks/post-commit\n--- a/.git/hooks/post-commit\n+++ b/.git/hooks/post-commit\n@@ -1,1 +1,2 @@\n+echo hooked\n"),
     ("SEC007_HOOK_TAMPERING", "--- a/package.json\n+++ b/package.json\n@@ -1,1 +1,2 @@\n+\"postinstall\": \"sh /tmp/run.sh\"\n"),
+    ("SEC007_HOOK_TAMPERING", "diff --git a/.husky/pre-commit b/.husky/pre-commit\n--- a/.husky/pre-commit\n+++ b/.husky/pre-commit\n@@ -1,1 +1,2 @@\n+exec evil_binary\n"),
+
+    # ── SEC008_DYNAMIC_ACCESS (20 attacks) ──
+    ("SEC008_DYNAMIC_ACCESS", "mod = __import__('os')\n"),
+    ("SEC008_DYNAMIC_ACCESS", "sub = __import__('subprocess')\n"),
+    ("SEC008_DYNAMIC_ACCESS", "import importlib\nm = importlib.import_module('shutil')\n"),
+    ("SEC008_DYNAMIC_ACCESS", "m = importlib.import_module('sys')\n"),
+    ("SEC008_DYNAMIC_ACCESS", "fn = getattr(os, 'system')\n"),
+    ("SEC008_DYNAMIC_ACCESS", "r = getattr(os, 'popen')\n"),
+    ("SEC008_DYNAMIC_ACCESS", "p = getattr(subprocess, 'Popen')\n"),
+    ("SEC008_DYNAMIC_ACCESS", "c = getattr(subprocess, 'call')\n"),
+    ("SEC008_DYNAMIC_ACCESS", "cmd = ''.join([chr(101), chr(118), chr(97), chr(108)])\n"),
+    ("SEC008_DYNAMIC_ACCESS", "s = ''.join(chr(i) for i in [115, 121, 115])\n"),
+    ("SEC008_DYNAMIC_ACCESS", "x = chr(101) + chr(120) + chr(101) + chr(99)\n"),
+    ("SEC008_DYNAMIC_ACCESS", "b = chr(98) + chr(97) + chr(115) + chr(104)\n"),
+    ("SEC008_DYNAMIC_ACCESS", "mod = __import__('requests')\n"),
+    ("SEC008_DYNAMIC_ACCESS", "imp = importlib.import_module('builtins')\n"),
+    ("SEC008_DYNAMIC_ACCESS", "f = getattr(os, 'execv')\n"),
+    ("SEC008_DYNAMIC_ACCESS", "f = getattr(subprocess, 'check_output')\n"),
+    ("SEC008_DYNAMIC_ACCESS", "p = ''.join([chr(47), chr(98), chr(105), chr(110)])\n"),
+    ("SEC008_DYNAMIC_ACCESS", "q = chr(115) + chr(104)\n"),
+    ("SEC008_DYNAMIC_ACCESS", "run = getattr(subprocess, 'run')\n"),
+    ("SEC008_DYNAMIC_ACCESS", "obj = __import__('base64')\n"),
 ]
 
 
@@ -367,6 +389,7 @@ def generate_markdown_report(data: dict) -> str:
         "SEC005_CREDENTIAL_READS": "Environment variable / credential access (os.environ, os.getenv, .env)",
         "SEC006_WORKFLOW_BUILD": "CI workflow, build config, and dependency edits",
         "SEC007_HOOK_TAMPERING": "Git hook or postinstall script tampering",
+        "SEC008_DYNAMIC_ACCESS": "Dynamic execution / access (__import__, importlib, getattr, chr join)",
     }
 
     for r_id, r_info in fp_data["per_rule_fire_counts"].items():
@@ -380,8 +403,8 @@ def generate_markdown_report(data: dict) -> str:
         "",
         "### Submission Fire Rates Matrix (Distinct Patches per Submission)",
         "",
-        "| Submission | Total Patches | Vendored | Scratch | SEC001 (Net) | SEC002 (Pipe) | SEC003 (Exec) | SEC004 (Obf) | SEC005 (Cred) | SEC006 (Build) | SEC007 (Hook) |",
-        "|---|---|---|---|---|---|---|---|---|---|---|",
+        "| Submission | Total Patches | Vendored | Scratch | SEC001 (Net) | SEC002 (Pipe) | SEC003 (Exec) | SEC004 (Obf) | SEC005 (Cred) | SEC006 (Build) | SEC007 (Hook) | SEC008 (Dyn) |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|",
     ])
 
     sub_mat = fp_data["submission_matrix"]
@@ -398,7 +421,8 @@ def generate_markdown_report(data: dict) -> str:
             f"{r_counts.get('SEC004_OBFUSCATION', 0)} | "
             f"{r_counts.get('SEC005_CREDENTIAL_READS', 0)} | "
             f"{r_counts.get('SEC006_WORKFLOW_BUILD', 0)} | "
-            f"{r_counts.get('SEC007_HOOK_TAMPERING', 0)} |"
+            f"{r_counts.get('SEC007_HOOK_TAMPERING', 0)} | "
+            f"{r_counts.get('SEC008_DYNAMIC_ACCESS', 0)} |"
         )
 
     lines.extend([

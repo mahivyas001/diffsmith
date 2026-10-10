@@ -9,11 +9,15 @@ RULE_ID = "SEC002_SHELL_PIPE"
 SEVERITY = "CRITICAL"
 
 SHELL_PIPE_PATTERNS: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"\bcurl\b.*?\|\s*(?:/bin/)?(?:ba|z|da)?sh\b", re.IGNORECASE), "curl piped directly to shell"),
-    (re.compile(r"\bwget\b.*?\|\s*(?:/bin/)?(?:ba|z|da)?sh\b", re.IGNORECASE), "wget piped directly to shell"),
+    (re.compile(r"\bcurl\b.*?\|\s*(?:sudo\s+)?(?:/bin/)?(?:ba|z|da)?sh\b", re.IGNORECASE), "curl piped directly to shell"),
+    (re.compile(r"\bwget\b.*?\|\s*(?:sudo\s+)?(?:/bin/)?(?:ba|z|da)?sh\b", re.IGNORECASE), "wget piped directly to shell"),
     (re.compile(r"\bcurl\b.*?\|\s*python[23]?\b", re.IGNORECASE), "curl piped directly to python interpreter"),
     (re.compile(r"\bwget\b.*?\|\s*python[23]?\b", re.IGNORECASE), "wget piped directly to python interpreter"),
     (re.compile(r"curl\|(?:ba)?sh", re.IGNORECASE), "shorthand curl|sh pipeline invocation"),
+    (re.compile(r"\b(?:bash|sh)\s+-c\s+[\"']?\$\(curl\b", re.IGNORECASE), "shell subshell curl execution"),
+    (re.compile(r"\b(?:bash|sh)\s+-c\s+[\"']?\$\(wget\b", re.IGNORECASE), "shell subshell wget execution"),
+    (re.compile(r"\bpython[23]?\s+-c\s+[\"']?\$\(curl\b", re.IGNORECASE), "python subshell curl execution"),
+    (re.compile(r"\bcurl\b.*?\s*&&\s*(?:sudo\s+)?(?:/bin/)?(?:ba|z|da)?sh\b", re.IGNORECASE), "download-then-run shell invocation"),
 ]
 
 

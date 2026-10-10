@@ -12,7 +12,23 @@ ENV_CREDENTIAL_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"\bos\.getenv\s*\("), "os.getenv read"),
     (re.compile(r"\bopen\s*\(\s*['\"][^'\"]*\.env(?:ironment|(?:\.[a-zA-Z0-9_-]+)*)?['\"]"), ".env credential file read"),
     (re.compile(r"\b(?:load_dotenv|dotenv_values)\s*\("), "dotenv credential load"),
-    (re.compile(r"\bopen\s*\(\s*['\"][^'\"]*(?:id_rsa|\.aws/credentials|\.ssh/|\.netrc|/etc/passwd)['\"]"), "sensitive credential path access"),
+    (re.compile(r"\bkeyring\.get_password\s*\("), "keyring password retrieval"),
+    (
+        re.compile(
+            r"(?:open|\.read_text|\.read_bytes)\s*\(\s*(?:(?:os\.path\.\w+\s*\(\s*)?['\"][^'\"]*(?:id_rsa|\.aws/credentials|\.ssh|\.netrc|/etc/passwd)[^'\"]*['\"]|"
+            r"Path\.home\(\)\s*/\s*['\"]\.aws['\"]\s*/\s*['\"]credentials['\"])",
+            re.IGNORECASE,
+        ),
+        "sensitive credential path access",
+    ),
+    (
+        re.compile(
+            r"Path\.home\(\)\s*/\s*['\"]\.aws['\"]\s*/\s*['\"]credentials['\"]|"
+            r"Path\.home\(\)\s*/\s*['\"]\.ssh['\"]",
+            re.IGNORECASE,
+        ),
+        "sensitive credential Path access",
+    ),
 ]
 
 # Env assignments / writes are not a finding (e.g. os.environ['FOO'] = 'bar')
@@ -27,7 +43,9 @@ ENV_WRITE_PATTERN = re.compile(
 CREDENTIAL_TARGET_PATTERN = re.compile(
     r"(?:^|[^a-zA-Z0-9])(?:TOKEN|SECRET|KEY|PASSWORD|PASSWD|CREDENTIAL|AWS_[A-Z0-9_]*|GITHUB_[A-Z0-9_]*|SSH_[A-Z0-9_]*)(?:$|[^a-zA-Z0-9])|"
     r"['\"][^'\"]*\.env(?:ironment|(?:\.[a-zA-Z0-9_-]+)*)?['\"]|"
-    r"(?:id_rsa|\.aws/credentials|\.ssh/|\.netrc|/etc/passwd)",
+    r"(?:id_rsa|\.aws/credentials|\.ssh|\.netrc|/etc/passwd)|"
+    r"Path\.home\(\)\s*/\s*['\"]\.aws['\"]\s*/\s*['\"]credentials['\"]|"
+    r"\bkeyring\.get_password\b",
     re.IGNORECASE,
 )
 

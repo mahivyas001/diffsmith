@@ -1,0 +1,631 @@
+[
+  {
+    "id": "net_urlopen",
+    "category": "plain",
+    "expected": "SEC001",
+    "fired": [
+      "SEC001_NETWORK_CALL"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "net_socket",
+    "category": "plain",
+    "expected": "SEC001",
+    "fired": [
+      "SEC001_NETWORK_CALL"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "net_httpclient",
+    "category": "plain",
+    "expected": "SEC001",
+    "fired": [
+      "SEC001_NETWORK_CALL"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "net_httpx",
+    "category": "plain",
+    "expected": "SEC001",
+    "fired": [
+      "SEC001_NETWORK_CALL"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "net_aiohttp",
+    "category": "plain",
+    "expected": "SEC001",
+    "fired": [
+      "SEC001_NETWORK_CALL"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "net_dunder_import",
+    "category": "evasion",
+    "expected": "SEC001",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "net_alias_import",
+    "category": "evasion",
+    "expected": "SEC001",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "net_importlib",
+    "category": "evasion",
+    "expected": "SEC001",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "pipe_sh",
+    "category": "plain",
+    "expected": "SEC002",
+    "fired": [
+      "SEC001_NETWORK_CALL",
+      "SEC002_SHELL_PIPE",
+      "SEC003_COMMAND_EXEC"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "pipe_bash_wget",
+    "category": "plain",
+    "expected": "SEC002",
+    "fired": [
+      "SEC001_NETWORK_CALL",
+      "SEC002_SHELL_PIPE",
+      "SEC003_COMMAND_EXEC"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "pipe_shfile",
+    "category": "plain",
+    "expected": "SEC002",
+    "fired": [
+      "SEC001_NETWORK_CALL"
+    ],
+    "hit_expected": false,
+    "hit_any": true
+  },
+  {
+    "id": "pipe_cmdsubst",
+    "category": "evasion",
+    "expected": "SEC002",
+    "fired": [
+      "SEC001_NETWORK_CALL"
+    ],
+    "hit_expected": false,
+    "hit_any": true
+  },
+  {
+    "id": "pipe_two_step",
+    "category": "evasion",
+    "expected": "SEC002",
+    "fired": [
+      "SEC001_NETWORK_CALL"
+    ],
+    "hit_expected": false,
+    "hit_any": true
+  },
+  {
+    "id": "pipe_python_c",
+    "category": "evasion",
+    "expected": "SEC002",
+    "fired": [
+      "SEC001_NETWORK_CALL"
+    ],
+    "hit_expected": false,
+    "hit_any": true
+  },
+  {
+    "id": "pipe_makefile",
+    "category": "plain",
+    "expected": "SEC002",
+    "fired": [
+      "SEC001_NETWORK_CALL",
+      "SEC002_SHELL_PIPE"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "exec_system",
+    "category": "plain",
+    "expected": "SEC003",
+    "fired": [
+      "SEC003_COMMAND_EXEC"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "exec_popen",
+    "category": "plain",
+    "expected": "SEC003",
+    "fired": [
+      "SEC003_COMMAND_EXEC"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "exec_subprocess_sh",
+    "category": "plain",
+    "expected": "SEC003",
+    "fired": [
+      "SEC003_COMMAND_EXEC"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "exec_eval",
+    "category": "plain",
+    "expected": "SEC003",
+    "fired": [
+      "SEC003_COMMAND_EXEC"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "exec_compile",
+    "category": "plain",
+    "expected": "SEC003",
+    "fired": [
+      "SEC003_COMMAND_EXEC"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "exec_dunder_import",
+    "category": "evasion",
+    "expected": "SEC003",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "exec_getattr",
+    "category": "evasion",
+    "expected": "SEC003",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "exec_importlib",
+    "category": "evasion",
+    "expected": "SEC003",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "exec_pty",
+    "category": "plain",
+    "expected": "SEC003",
+    "fired": [
+      "SEC003_COMMAND_EXEC"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "obf_b64_exec",
+    "category": "plain",
+    "expected": "SEC004",
+    "fired": [
+      "SEC003_COMMAND_EXEC",
+      "SEC004_OBFUSCATION"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "obf_rot13",
+    "category": "plain",
+    "expected": "SEC004",
+    "fired": [
+      "SEC004_OBFUSCATION"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "obf_zlib_b64",
+    "category": "plain",
+    "expected": "SEC004",
+    "fired": [
+      "SEC004_OBFUSCATION"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "obf_fromhex",
+    "category": "plain",
+    "expected": "SEC004",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "obf_marshal",
+    "category": "plain",
+    "expected": "SEC004",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "obf_chr_join",
+    "category": "evasion",
+    "expected": "SEC004",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "obf_b64_alias",
+    "category": "evasion",
+    "expected": "SEC004",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "cred_aws_env",
+    "category": "plain",
+    "expected": "SEC005",
+    "fired": [
+      "SEC005_CREDENTIAL_READS"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "cred_gh_token",
+    "category": "plain",
+    "expected": "SEC005",
+    "fired": [
+      "SEC005_CREDENTIAL_READS"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "cred_ssh_key",
+    "category": "plain",
+    "expected": "SEC005",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "cred_passwd",
+    "category": "plain",
+    "expected": "SEC005",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "cred_dotenv",
+    "category": "plain",
+    "expected": "SEC005",
+    "fired": [
+      "SEC005_CREDENTIAL_READS"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "cred_aws_file",
+    "category": "evasion",
+    "expected": "SEC005",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "cred_environ_dump",
+    "category": "evasion",
+    "expected": "SEC005",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "cred_keyring",
+    "category": "plain",
+    "expected": "SEC005",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "wf_new_workflow",
+    "category": "plain",
+    "expected": "SEC006",
+    "fired": [
+      "SEC006_WORKFLOW_BUILD"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "wf_setup_cmdclass",
+    "category": "plain",
+    "expected": "SEC006",
+    "fired": [
+      "SEC006_WORKFLOW_BUILD",
+      "SEC007_HOOK_TAMPERING"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "wf_requirements",
+    "category": "plain",
+    "expected": "SEC006",
+    "fired": [
+      "SEC006_WORKFLOW_BUILD"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "wf_pyproject_dep",
+    "category": "plain",
+    "expected": "SEC006",
+    "fired": [
+      "SEC006_WORKFLOW_BUILD"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "wf_gitlab_ci",
+    "category": "plain",
+    "expected": "SEC006",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "wf_tox",
+    "category": "evasion",
+    "expected": "SEC006",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "wf_package_json",
+    "category": "plain",
+    "expected": "SEC006",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "wf_dockerfile",
+    "category": "evasion",
+    "expected": "SEC006",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "hook_git_hook",
+    "category": "plain",
+    "expected": "SEC007",
+    "fired": [
+      "SEC001_NETWORK_CALL",
+      "SEC007_HOOK_TAMPERING"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "hook_husky",
+    "category": "plain",
+    "expected": "SEC007",
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "hook_postinstall",
+    "category": "plain",
+    "expected": "SEC007",
+    "fired": [
+      "SEC007_HOOK_TAMPERING"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "hook_precommit_cfg",
+    "category": "plain",
+    "expected": "SEC007",
+    "fired": [
+      "SEC007_HOOK_TAMPERING"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "hook_setup_cmdclass",
+    "category": "evasion",
+    "expected": "SEC007",
+    "fired": [
+      "SEC006_WORKFLOW_BUILD",
+      "SEC007_HOOK_TAMPERING"
+    ],
+    "hit_expected": true,
+    "hit_any": true
+  },
+  {
+    "id": "ok_requests_substring",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "ok_evaluate",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "ok_executor",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "ok_socket_timeout",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "ok_comment_curl",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "ok_comment_system",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "ok_json_hash",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "ok_b64_name",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "ok_docs_setup",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "ok_docs_requirements",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "ok_setup_utils",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "ok_test_file",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "ok_readme",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "ok_urlparse",
+    "category": "benign",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  },
+  {
+    "id": "arg_env_settings",
+    "category": "arguable",
+    "expected": null,
+    "fired": [
+      "SEC005_CREDENTIAL_READS"
+    ],
+    "hit_expected": false,
+    "hit_any": true
+  },
+  {
+    "id": "arg_subprocess_git",
+    "category": "arguable",
+    "expected": null,
+    "fired": [
+      "SEC003_COMMAND_EXEC"
+    ],
+    "hit_expected": false,
+    "hit_any": true
+  },
+  {
+    "id": "arg_b64_encode",
+    "category": "arguable",
+    "expected": null,
+    "fired": [],
+    "hit_expected": false,
+    "hit_any": false
+  }
+]

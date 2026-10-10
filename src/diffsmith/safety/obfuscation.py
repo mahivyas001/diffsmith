@@ -3,10 +3,9 @@ src/diffsmith/safety/obfuscation.py — Rule 4: Detect base64 and obfuscated str
 """
 
 import re
-from .safety_utils import extract_added_lines
+from .safety_utils import extract_added_lines, extract_context_lines, is_test_file
 
 RULE_ID = "SEC004_OBFUSCATION"
-SEVERITY = "HIGH"
 
 OBFUSCATION_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"\bbase64\.(?:b64decode|standard_b64decode|urlsafe_b64decode|decodestring)\s*\("), "base64 decoding"),
@@ -22,6 +21,7 @@ def check_obfuscation(patch_text: str) -> list[dict]:
     """Scan added diff lines for base64 or obfuscated string decoding."""
     findings = []
     added_lines = extract_added_lines(patch_text)
+    context_map = extract_context_lines(patch_text)
 
     for line_info in added_lines:
         stripped = line_info.content.strip()
@@ -30,9 +30,16 @@ def check_obfuscation(patch_text: str) -> list[dict]:
 
         for pattern, desc in OBFUSCATION_PATTERNS:
             if pattern.search(line_info.content):
+                file_ctx = context_map.get(line_info.file_path, [])
+                is_modifying_existing = any(pattern.search(ctx_line) for ctx_line in file_ctx)
+                if is_test_file(line_info.file_path) or is_modifying_existing:
+                    sev = "low"
+                else:
+                    sev = "HIGH"
+
                 findings.append({
                     "rule_id": RULE_ID,
-                    "severity": SEVERITY,
+                    "severity": sev,
                     "file": line_info.file_path,
                     "line": line_info.line_no,
                     "evidence": f"{desc}: {stripped[:120]}",

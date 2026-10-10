@@ -1,7 +1,8 @@
 """
-src/diffsmith/safety/scanner.py — Aggregator scanner running all diff security rules.
+src/diffsmith/safety/scanner.py — Aggregator scanner running all diff security and structural rules.
 """
 
+from .safety_utils import check_vendored_paths, check_scratch_scripts
 from .network_calls import check_network_calls
 from .shell_pipe import check_shell_pipe
 from .command_exec import check_command_exec
@@ -11,6 +12,8 @@ from .workflow_build import check_workflow_build
 from .hook_tampering import check_hook_tampering
 
 ALL_RULES = [
+    ("vendored_directory_added", check_vendored_paths),
+    ("scratch_script_added", check_scratch_scripts),
     ("SEC001_NETWORK_CALL", check_network_calls),
     ("SEC002_SHELL_PIPE", check_shell_pipe),
     ("SEC003_COMMAND_EXEC", check_command_exec),
@@ -23,7 +26,7 @@ ALL_RULES = [
 
 def scan_patch(patch_text: str) -> list[dict]:
     """
-    Run all patch-behavior security rules over patch_text.
+    Run all patch-behavior security and structural rules over patch_text.
 
     Returns a list of finding dicts:
         {rule_id, severity, file, line, evidence}

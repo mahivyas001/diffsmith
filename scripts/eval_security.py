@@ -3,16 +3,15 @@ scripts/eval_security.py — Phase 4a Patch Behavior Security Evaluation
 
 Runs:
  (a) False-Positive Study: all 5,123 real SWE-bench agent patches.
-     Reports fire counts per rule and per submission, prints 5 random flagged examples per rule.
- (b) Coverage Study: synthetic dataset with known-bad malicious patterns.
-     Reports per-rule detection rate.
+     Reports distinct patches AND distinct instance_ids per rule,
+     samples 5 examples per DISTINCT PATCH, and reports submission fire rates.
+ (b) Coverage Study: self-authored synthetic coverage (not evidence of detection).
 """
 
 import json
 import os
 import random
 import sys
-import pandas as pd
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, ROOT)
@@ -202,59 +201,76 @@ def run_evaluation() -> dict:
     total_patches = len(df)
     print(f"Loaded {total_patches} real agent patches for study (a).")
 
-    # ── Study (a): False-Positive Study on 5,123 Real Agent Patches ─────────
     all_rule_ids = [r[0] for r in ALL_RULES]
-    rule_fire_counts = {r_id: 0 for r_id in all_rule_ids}
-    rule_flagged_examples: dict[str, list[dict]] = {r_id: [] for r_id in all_rule_ids}
+
+    # Dictionaries to track distinct patches and distinct instances
+    rule_distinct_patches: dict[str, set[int]] = {r_id: set() for r_id in all_rule_ids}
+    rule_distinct_instances: dict[str, set[str]] = {r_id: set() for r_id in all_rule_ids}
+    rule_severity_counts: dict[str, dict[str, int]] = {r_id: {} for r_id in all_rule_ids}
+
+    # Samples grouped by DISTINCT PATCH (patch_index -> first representative finding)
+    rule_patch_samples: dict[str, dict[int, dict]] = {r_id: {} for r_id in all_rule_ids}
 
     subs = sorted(df["submission"].unique())
     sub_rule_matrix = {s: {r_id: 0 for r_id in all_rule_ids} for s in subs}
     sub_patch_counts = {s: int((df["submission"] == s).sum()) for s in subs}
 
-    total_patches_flagged = 0
+    flagged_patches_total: set[int] = set()
 
     for idx, row in df.iterrows():
         p = str(row.get("patch", ""))
-        sub = row.get("submission", "")
-        iid = row.get("instance_id", "")
+        sub = str(row.get("submission", ""))
+        iid = str(row.get("instance_id", ""))
         findings = scan_patch(p)
 
         if findings:
-            total_patches_flagged += 1
+            flagged_patches_total.add(idx)
             fired_rules = {f["rule_id"] for f in findings}
             for r_id in fired_rules:
-                rule_fire_counts[r_id] += 1
+                rule_distinct_patches[r_id].add(idx)
+                rule_distinct_instances[r_id].add(iid)
                 sub_rule_matrix[sub][r_id] += 1
 
             for f in findings:
-                rule_flagged_examples[f["rule_id"]].append({
-                    "instance_id": iid,
-                    "submission": sub,
-                    "file": f["file"],
-                    "line": f["line"],
-                    "evidence": f["evidence"],
-                })
+                r_id = f["rule_id"]
+                sev = f["severity"]
+                rule_severity_counts[r_id][sev] = rule_severity_counts[r_id].get(sev, 0) + 1
 
-    # Sample up to 5 random examples per rule deterministically
-    sampled_examples: dict[str, list[dict]] = {}
+                if idx not in rule_patch_samples[r_id]:
+                    rule_patch_samples[r_id][idx] = {
+                        "instance_id": iid,
+                        "submission": sub,
+                        "file": f["file"],
+                        "line": f["line"],
+                        "severity": f["severity"],
+                        "evidence": f["evidence"],
+                    }
+
+    # Sample up to 5 DISTINCT PATCHES per rule
+    sampled_patch_examples: dict[str, list[dict]] = {}
     rng = random.Random(42)
     for r_id in all_rule_ids:
-        exs = rule_flagged_examples[r_id]
-        if len(exs) <= 5:
-            sampled_examples[r_id] = exs
+        patch_dict = rule_patch_samples[r_id]
+        sorted_patch_indices = sorted(patch_dict.keys())
+        if len(sorted_patch_indices) <= 5:
+            sampled_patch_examples[r_id] = [patch_dict[idx] for idx in sorted_patch_indices]
         else:
-            sampled_examples[r_id] = rng.sample(exs, 5)
+            chosen = rng.sample(sorted_patch_indices, 5)
+            sampled_patch_examples[r_id] = [patch_dict[idx] for idx in sorted(chosen)]
 
     fp_rule_summary = {}
     for r_id in all_rule_ids:
-        cnt = rule_fire_counts[r_id]
-        pct = (cnt / total_patches) * 100.0
+        d_p = len(rule_distinct_patches[r_id])
+        d_i = len(rule_distinct_instances[r_id])
+        pct = (d_p / total_patches) * 100.0
         fp_rule_summary[r_id] = {
-            "count": cnt,
+            "distinct_patches": d_p,
+            "distinct_instances": d_i,
             "percentage": pct,
+            "severity_breakdown": rule_severity_counts[r_id],
         }
 
-    # ── Study (b): Coverage Study on Synthetic Malicious Set ────────────────
+    # ── Study (b): Self-Authored Synthetic Coverage ─────────────────────────
     print(f"Running study (b) on {len(SYNTHETIC_ATTACKS)} synthetic attack snippets...")
     coverage_rule_stats = {r_id: {"total": 0, "detected": 0} for r_id in all_rule_ids}
 
@@ -280,14 +296,15 @@ def run_evaluation() -> dict:
     results = {
         "study_a_false_positives": {
             "total_patches": total_patches,
-            "total_flagged": total_patches_flagged,
-            "overall_fp_rate": (total_patches_flagged / total_patches) * 100.0,
+            "total_flagged_patches": len(flagged_patches_total),
+            "overall_fp_rate": (len(flagged_patches_total) / total_patches) * 100.0,
             "per_rule_fire_counts": fp_rule_summary,
             "submission_matrix": sub_rule_matrix,
             "submission_patch_counts": sub_patch_counts,
-            "sampled_examples": sampled_examples,
+            "sampled_examples_per_distinct_patch": sampled_patch_examples,
         },
         "study_b_coverage": {
+            "title": "Self-authored synthetic coverage; not evidence of detection",
             "total_synthetic_attacks": len(SYNTHETIC_ATTACKS),
             "per_rule_coverage": coverage_summary,
         },
@@ -312,20 +329,22 @@ def generate_markdown_report(data: dict) -> str:
     lines = [
         "# Phase 4a Security Scanner Empirical Studies",
         "",
-        "> **Note on Maliciousness:** Nothing in the SWE-bench dataset (5,123 real agent patches) is known to be malicious; Study (a) therefore measures the **false-alarm rate** on legitimate developer/agent software bug patches. Study (b) measures **rule coverage** against known malicious signatures, not real-world zero-day detection.",
+        "> **Note on Maliciousness:** Nothing in the SWE-bench dataset (5,123 real agent patches) is known to be malicious; Study (a) therefore measures the **false-alarm rate** on legitimate developer/agent software bug patches. Study (b) measures **self-authored synthetic coverage; not evidence of detection**.",
         "",
         "## Table (a): False-Positive Study on 5,123 Real SWE-bench Agent Patches",
         "",
         f"- **Total Patches Analyzed:** `{fp_data['total_patches']}`",
-        f"- **Total Patches Flagged:** `{fp_data['total_flagged']}` ({fp_data['overall_fp_rate']:.2f}% overall false-alarm rate)",
+        f"- **Total Distinct Flagged Patches:** `{fp_data['total_flagged_patches']}` ({fp_data['overall_fp_rate']:.2f}% overall false-alarm rate)",
         "",
-        "### Rule Fire Counts (False-Alarm Rate Across 5,123 Patches)",
+        "### Rule Fire Counts (Distinct Patches & Distinct Instances Across 5,123 Patches)",
         "",
-        "| Rule ID | Rule Description | Fire Count | False-Alarm Rate (%) |",
-        "|---|---|---|---|",
+        "| Rule ID | Rule Description | Distinct Patches | Distinct Instances | False-Alarm Rate (%) | Severity Distribution |",
+        "|---|---|---|---|---|---|",
     ]
 
     rule_descriptions = {
+        "vendored_directory_added": "Vendored or virtualenv directory modified (venv, site-packages, etc.)",
+        "scratch_script_added": "Top-level scratch/reproduction script added (reproduce*.py, tmp*.py)",
         "SEC001_NETWORK_CALL": "New network calls (requests, urllib, socket, curl, wget)",
         "SEC002_SHELL_PIPE": "Piped shell execution (curl|sh, wget|sh)",
         "SEC003_COMMAND_EXEC": "Command execution (subprocess, os.system, eval, exec)",
@@ -337,14 +356,17 @@ def generate_markdown_report(data: dict) -> str:
 
     for r_id, r_info in fp_data["per_rule_fire_counts"].items():
         desc = rule_descriptions.get(r_id, "")
-        lines.append(f"| `{r_id}` | {desc} | {r_info['count']} | {r_info['percentage']:.2f}% |")
+        sev_str = ", ".join(f"{k}:{v}" for k, v in sorted(r_info["severity_breakdown"].items())) or "none"
+        lines.append(
+            f"| `{r_id}` | {desc} | {r_info['distinct_patches']} | {r_info['distinct_instances']} | {r_info['percentage']:.2f}% | {sev_str} |"
+        )
 
     lines.extend([
         "",
-        "### Submission Fire Rates Matrix",
+        "### Submission Fire Rates Matrix (Distinct Patches per Submission)",
         "",
-        "| Submission | Total Patches | SEC001 (Net) | SEC002 (Pipe) | SEC003 (Exec) | SEC004 (Obf) | SEC005 (Cred) | SEC006 (Build) | SEC007 (Hook) |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "| Submission | Total Patches | Vendored | Scratch | SEC001 (Net) | SEC002 (Pipe) | SEC003 (Exec) | SEC004 (Obf) | SEC005 (Cred) | SEC006 (Build) | SEC007 (Hook) |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ])
 
     sub_mat = fp_data["submission_matrix"]
@@ -353,23 +375,25 @@ def generate_markdown_report(data: dict) -> str:
         n_p = sub_counts[sub]
         lines.append(
             f"| `{sub}` | {n_p} | "
-            f"{r_counts['SEC001_NETWORK_CALL']} | "
-            f"{r_counts['SEC002_SHELL_PIPE']} | "
-            f"{r_counts['SEC003_COMMAND_EXEC']} | "
-            f"{r_counts['SEC004_OBFUSCATION']} | "
-            f"{r_counts['SEC005_CREDENTIAL_READS']} | "
-            f"{r_counts['SEC006_WORKFLOW_BUILD']} | "
-            f"{r_counts['SEC007_HOOK_TAMPERING']} |"
+            f"{r_counts.get('vendored_directory_added', 0)} | "
+            f"{r_counts.get('scratch_script_added', 0)} | "
+            f"{r_counts.get('SEC001_NETWORK_CALL', 0)} | "
+            f"{r_counts.get('SEC002_SHELL_PIPE', 0)} | "
+            f"{r_counts.get('SEC003_COMMAND_EXEC', 0)} | "
+            f"{r_counts.get('SEC004_OBFUSCATION', 0)} | "
+            f"{r_counts.get('SEC005_CREDENTIAL_READS', 0)} | "
+            f"{r_counts.get('SEC006_WORKFLOW_BUILD', 0)} | "
+            f"{r_counts.get('SEC007_HOOK_TAMPERING', 0)} |"
         )
 
     lines.extend([
         "",
-        "### Random Flagged Examples (Up to 5 Random Flagged Patches Per Rule)",
+        "### Random Flagged Examples (Sampled per DISTINCT PATCH, Up to 5 per Rule)",
         "",
     ])
 
-    for r_id, examples in fp_data["sampled_examples"].items():
-        lines.append(f"#### Rule `{r_id}` ({len(examples)} examples shown)")
+    for r_id, examples in fp_data["sampled_examples_per_distinct_patch"].items():
+        lines.append(f"#### Rule `{r_id}` ({len(examples)} distinct patch examples shown)")
         if not examples:
             lines.append("- *Zero detections in 5,123 patches (0.00% false-alarm rate).*")
             lines.append("")
@@ -377,21 +401,23 @@ def generate_markdown_report(data: dict) -> str:
 
         for i, ex in enumerate(examples, 1):
             lines.extend([
-                f"{i}. **Instance:** `{ex['instance_id']}` | **Submission:** `{ex['submission']}` | **File:** `{ex['file']}:{ex['line']}`",
+                f"{i}. **Instance:** `{ex['instance_id']}` | **Submission:** `{ex['submission']}` | **File:** `{ex['file']}:{ex['line']}` | **Severity:** `{ex['severity']}`",
                 f"   - **Evidence:** `{ex['evidence']}`",
             ])
         lines.append("")
 
     lines.extend([
-        "## Table (b): Coverage Study on Synthetic Malicious Dataset",
+        "## Table (b): Self-Authored Synthetic Coverage (Not Evidence of Detection)",
         "",
-        "> **Methodology:** A dedicated synthetic evaluation corpus containing 140 known-bad malicious patch snippets (20 diverse attack variants per rule) was evaluated against the scanner. Label: `synthetic: True`.",
+        "> **Methodology:** A dedicated synthetic evaluation corpus containing 140 known-bad malicious patch snippets (20 diverse attack variants per rule) was evaluated against the scanner. Label: `synthetic: True`. Note: This measures **self-authored synthetic coverage** against targeted attack shapes, not evidence of real-world detection or zero-day discovery.",
         "",
         "| Rule ID | Rule Description | Synthetic Attacks | Detected | Coverage Detection Rate (%) |",
         "|---|---|---|---|---|",
     ])
 
     for r_id, c_info in cov_data["per_rule_coverage"].items():
+        if c_info["total_synthetic"] == 0:
+            continue
         desc = rule_descriptions.get(r_id, "")
         lines.append(f"| `{r_id}` | {desc} | {c_info['total_synthetic']} | {c_info['detected']} | {c_info['detection_rate']:.1f}% |")
 

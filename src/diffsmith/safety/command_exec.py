@@ -3,10 +3,9 @@ src/diffsmith/safety/command_exec.py — Rule 3: Detect subprocess, os.system, e
 """
 
 import re
-from .safety_utils import extract_added_lines
+from .safety_utils import extract_added_lines, extract_context_lines, is_test_file
 
 RULE_ID = "SEC003_COMMAND_EXEC"
-SEVERITY = "HIGH"
 
 COMMAND_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"\bsubprocess\.(?:Popen|run|call|check_call|check_output|getoutput|getstatusoutput)\s*\("), "subprocess execution"),
@@ -21,6 +20,7 @@ def check_command_exec(patch_text: str) -> list[dict]:
     """Scan added diff lines for subprocess, os.system, eval, and exec invocations."""
     findings = []
     added_lines = extract_added_lines(patch_text)
+    context_map = extract_context_lines(patch_text)
 
     for line_info in added_lines:
         stripped = line_info.content.strip()
@@ -29,9 +29,16 @@ def check_command_exec(patch_text: str) -> list[dict]:
 
         for pattern, desc in COMMAND_PATTERNS:
             if pattern.search(line_info.content):
+                file_ctx = context_map.get(line_info.file_path, [])
+                is_modifying_existing = any(pattern.search(ctx_line) for ctx_line in file_ctx)
+                if is_test_file(line_info.file_path) or is_modifying_existing:
+                    sev = "low"
+                else:
+                    sev = "HIGH"
+
                 findings.append({
                     "rule_id": RULE_ID,
-                    "severity": SEVERITY,
+                    "severity": sev,
                     "file": line_info.file_path,
                     "line": line_info.line_no,
                     "evidence": f"{desc}: {stripped[:120]}",

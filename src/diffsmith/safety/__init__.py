@@ -12,6 +12,7 @@ from .credential_reads import check_credential_reads
 from .workflow_build import check_workflow_build
 from .hook_tampering import check_hook_tampering
 from .dynamic_access import check_dynamic_access
+from .injection import scan_text, scan_patch_comments
 
 __all__ = [
     "scan_patch",
@@ -26,4 +27,6 @@ __all__ = [
     "check_workflow_build",
     "check_hook_tampering",
     "check_dynamic_access",
+    "scan_text",
+    "scan_patch_comments",
 ]

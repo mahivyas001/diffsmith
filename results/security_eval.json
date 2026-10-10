@@ -468,7 +468,7 @@
           "file": "django/contrib/sessions/backends/base.py",
           "line": 123,
           "severity": "low",
-          "evidence": "base64 decoding: encoded_data = base64.b64decode(session_data.encode('ascii'))"
+          "evidence": "base64/binary decoding: encoded_data = base64.b64decode(session_data.encode('ascii'))"
         },
         {
           "instance_id": "django__django-13321",
@@ -476,7 +476,7 @@
           "file": "django/contrib/sessions/backends/base.py",
           "line": 139,
           "severity": "low",
-          "evidence": "base64 decoding: encoded_data = base64.b64decode(session_data.encode('ascii'))"
+          "evidence": "base64/binary decoding: encoded_data = base64.b64decode(session_data.encode('ascii'))"
         },
         {
           "instance_id": "django__django-13321",
@@ -484,7 +484,7 @@
           "file": "django/contrib/sessions/backends/base.py",
           "line": 137,
           "severity": "low",
-          "evidence": "base64 decoding: encoded_data = base64.b64decode(session_data.encode('ascii'))"
+          "evidence": "base64/binary decoding: encoded_data = base64.b64decode(session_data.encode('ascii'))"
         },
         {
           "instance_id": "django__django-13321",
@@ -492,7 +492,7 @@
           "file": "django/contrib/sessions/backends/base.py",
           "line": 136,
           "severity": "low",
-          "evidence": "base64 decoding: encoded_data = base64.b64decode(session_data.encode('ascii'))"
+          "evidence": "base64/binary decoding: encoded_data = base64.b64decode(session_data.encode('ascii'))"
         },
         {
           "instance_id": "django__django-13321",
@@ -500,7 +500,7 @@
           "file": "django/contrib/sessions/backends/base.py",
           "line": 137,
           "severity": "low",
-          "evidence": "base64 decoding: encoded_data = base64.b64decode(session_data.encode('ascii'))"
+          "evidence": "base64/binary decoding: encoded_data = base64.b64decode(session_data.encode('ascii'))"
         }
       ],
       "SEC005_CREDENTIAL_READS": [

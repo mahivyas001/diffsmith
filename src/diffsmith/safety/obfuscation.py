@@ -8,12 +8,13 @@ from .safety_utils import extract_added_lines, extract_context_lines, is_test_fi
 RULE_ID = "SEC004_OBFUSCATION"
 
 OBFUSCATION_PATTERNS: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"\bbase64\.(?:b64decode|standard_b64decode|urlsafe_b64decode|decodestring)\s*\("), "base64 decoding"),
+    (re.compile(r"\bbase64\.(?:b64decode|standard_b64decode|urlsafe_b64decode|decodestring|b16decode|b32decode|b85decode|a85decode)\s*\("), "base64/binary decoding"),
     (re.compile(r"(?<!\w)b64decode\s*\("), "b64decode invocation"),
     (re.compile(r"\bbinascii\.(?:a2b_base64|unhexlify|a2b_hex)\s*\("), "binascii decoding"),
     (re.compile(r"(?<!\w)unhexlify\s*\("), "unhexlify decoding"),
     (re.compile(r"\bbytes\.fromhex\s*\("), "bytes.fromhex decoding"),
     (re.compile(r"\bmarshal\.loads\s*\("), "marshal.loads code deserialization"),
+    (re.compile(r"\b(?:zlib|bz2|lzma|gzip)\.decompress\s*\("), "compression decompression decoding"),
     (re.compile(r"\bcodecs\.decode\s*\(.*?['\"](?:rot_?13|base64|hex(?:_codec)?)['\"]", re.IGNORECASE), "codecs obfuscated decode"),
     (re.compile(r"__import__\s*\(\s*['\"]base64['\"]\s*\)"), "dynamic base64 import"),
 ]

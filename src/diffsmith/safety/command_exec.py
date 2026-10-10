@@ -9,10 +9,14 @@ RULE_ID = "SEC003_COMMAND_EXEC"
 
 COMMAND_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"\bsubprocess\.(?:Popen|run|call|check_call|check_output|getoutput|getstatusoutput)\s*\("), "subprocess execution"),
+    (re.compile(r"\basyncio\.(?:create_subprocess_exec|create_subprocess_shell)\s*\("), "asyncio subprocess execution"),
     (re.compile(r"\bos\.(?:system|popen|spawn[lpev]*|exec[lpev]*)\s*\("), "os execution command"),
+    (re.compile(r"\brunpy\.(?:run_path|run_module)\s*\("), "runpy script execution"),
+    (re.compile(r"\bcode\.(?:InteractiveInterpreter|InteractiveConsole)\s*\("), "code interactive execution"),
     (re.compile(r"(?<!\w)eval\s*\("), "dynamic eval() execution"),
     (re.compile(r"(?<!\w)exec\s*\("), "dynamic exec() execution"),
     (re.compile(r"\bpty\.spawn\s*\("), "pty interactive shell spawn"),
+    (re.compile(r"\bctypes\b.*?\.system\s*\("), "ctypes system call execution"),
 ]
 
 

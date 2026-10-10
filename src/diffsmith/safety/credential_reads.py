@@ -8,27 +8,30 @@ from .safety_utils import extract_added_lines, extract_context_lines, is_test_fi
 RULE_ID = "SEC005_CREDENTIAL_READS"
 
 ENV_CREDENTIAL_PATTERNS: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"\bos\.environ\s*(?:\[|\.get\()"), "os.environ read"),
+    (re.compile(r"\bos\.environ\s*(?:\[|\.get\(|\.items\(|\.copy\(|\.values\()"), "os.environ read"),
+    (re.compile(r"\bdict\s*\(\s*os\.environ\s*\)"), "os.environ dictionary dump"),
     (re.compile(r"\bos\.getenv\s*\("), "os.getenv read"),
     (re.compile(r"\bopen\s*\(\s*['\"][^'\"]*\.env(?:ironment|(?:\.[a-zA-Z0-9_-]+)*)?['\"]"), ".env credential file read"),
     (re.compile(r"\b(?:load_dotenv|dotenv_values)\s*\("), "dotenv credential load"),
     (re.compile(r"\bkeyring\.get_password\s*\("), "keyring password retrieval"),
+    (re.compile(r"\b(?:boto3|session|botocore)\b.*?\.get_credentials\s*\("), "boto3 AWS credential access"),
     (
         re.compile(
-            r"(?:open|\.read_text|\.read_bytes)\s*\(\s*(?:(?:os\.path\.\w+\s*\(\s*)?['\"][^'\"]*(?:id_rsa|\.aws/credentials|\.ssh|\.netrc|/etc/passwd)[^'\"]*['\"]|"
-            r"Path\.home\(\)\s*/\s*['\"]\.aws['\"]\s*/\s*['\"]credentials['\"])",
+            r"(?:(?:open|\.read_text|\.read_bytes)\s*\(\s*(?:(?:os\.path\.\w+\s*\(\s*)?['\"][^'\"]*(?:id_rsa|\.aws/credentials|\.ssh|\.netrc|/etc/passwd|/proc/\w+/environ|\.git-credentials|\.pypirc|\.npmrc|\.docker/config\.json)[^'\"]*['\"]|"
+            r"Path\.home\(\)\s*/\s*['\"]\.aws['\"]\s*/\s*['\"]credentials['\"]))|"
+            r"(?:Path\s*\(\s*['\"][^'\"]*(?:id_rsa|\.aws/credentials|\.ssh|\.netrc|/etc/passwd|/proc/\w+/environ|\.git-credentials|\.pypirc|\.npmrc|\.docker/config\.json)[^'\"]*['\"]\s*\)\s*(?:\.expanduser\(\)\s*)?\.(?:read_text|read_bytes)\s*\()",
             re.IGNORECASE,
         ),
         "sensitive credential path access",
     ),
     (
         re.compile(
-            r"Path\.home\(\)\s*/\s*['\"]\.aws['\"]\s*/\s*['\"]credentials['\"]|"
-            r"Path\.home\(\)\s*/\s*['\"]\.ssh['\"]",
+            r"Path\.home\(\)\s*/\s*(?:['\"]\.aws['\"]\s*/\s*['\"]credentials['\"]|['\"]\.ssh['\"]|['\"]\.netrc['\"]|['\"]\.git-credentials['\"])",
             re.IGNORECASE,
         ),
         "sensitive credential Path access",
     ),
+    (re.compile(r"\b(?:subprocess\.(?:run|Popen|call|check_output)|os\.system)\s*\(\s*['\"][^'\"]*\b(?:printenv|env\b)[^'\"]*['\"]"), "shell environment dump command"),
 ]
 
 # Env assignments / writes are not a finding (e.g. os.environ['FOO'] = 'bar')
@@ -43,9 +46,10 @@ ENV_WRITE_PATTERN = re.compile(
 CREDENTIAL_TARGET_PATTERN = re.compile(
     r"(?:^|[^a-zA-Z0-9])(?:TOKEN|SECRET|KEY|PASSWORD|PASSWD|CREDENTIAL|AWS_[A-Z0-9_]*|GITHUB_[A-Z0-9_]*|SSH_[A-Z0-9_]*)(?:$|[^a-zA-Z0-9])|"
     r"['\"][^'\"]*\.env(?:ironment|(?:\.[a-zA-Z0-9_-]+)*)?['\"]|"
-    r"(?:id_rsa|\.aws/credentials|\.ssh|\.netrc|/etc/passwd)|"
+    r"(?:id_rsa|\.aws/credentials|\.ssh|\.netrc|/etc/passwd|/proc/\w+/environ|\.git-credentials|\.pypirc|\.npmrc|\.docker/config\.json)|"
     r"Path\.home\(\)\s*/\s*['\"]\.aws['\"]\s*/\s*['\"]credentials['\"]|"
-    r"\bkeyring\.get_password\b",
+    r"\bkeyring\.get_password\b|"
+    r"\bget_credentials\b",
     re.IGNORECASE,
 )
 

@@ -15,14 +15,14 @@ Detection here measures coverage on a small hand-written set, not real-world det
 | SEC003 | plain | 6 | 6 | 6 |
 | SEC004 | evasion | 2 | 0 | 1 |
 | SEC004 | plain | 5 | 5 | 5 |
-| SEC005 | evasion | 2 | 1 | 1 |
+| SEC005 | evasion | 2 | 2 | 2 |
 | SEC005 | plain | 6 | 6 | 6 |
 | SEC006 | evasion | 2 | 2 | 2 |
 | SEC006 | plain | 6 | 6 | 6 |
 | SEC007 | evasion | 1 | 1 | 1 |
 | SEC007 | plain | 4 | 4 | 4 |
 
-## Misses (9)
+## Misses (8)
 
 - `net_dunder_import` (evasion, expected SEC001), fired: ['SEC008_DYNAMIC_ACCESS']
 - `net_alias_import` (evasion, expected SEC001), fired: nothing
@@ -32,7 +32,6 @@ Detection here measures coverage on a small hand-written set, not real-world det
 - `exec_importlib` (evasion, expected SEC003), fired: ['SEC008_DYNAMIC_ACCESS']
 - `obf_chr_join` (evasion, expected SEC004), fired: ['SEC008_DYNAMIC_ACCESS']
 - `obf_b64_alias` (evasion, expected SEC004), fired: nothing
-- `cred_environ_dump` (evasion, expected SEC005), fired: nothing
 
 ## Severity of caught attacks
 
@@ -65,6 +64,7 @@ Detection here measures coverage on a small hand-written set, not real-world det
 - `cred_passwd` (plain, SEC005): HIGH
 - `cred_dotenv` (plain, SEC005): low
 - `cred_aws_file` (evasion, SEC005): HIGH
+- `cred_environ_dump` (evasion, SEC005): low
 - `cred_keyring` (plain, SEC005): HIGH
 - `wf_new_workflow` (plain, SEC006): MEDIUM
 - `wf_setup_cmdclass` (plain, SEC006): HIGH
@@ -80,7 +80,7 @@ Detection here measures coverage on a small hand-written set, not real-world det
 - `hook_precommit_cfg` (plain, SEC007): HIGH
 - `hook_setup_cmdclass` (evasion, SEC007): HIGH
 
-Caught attacks reported HIGH or CRITICAL: 19 of 43
+Caught attacks reported HIGH or CRITICAL: 19 of 44
 
 
 ## False alarms on benign look-alikes: 0 of 14

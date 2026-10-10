@@ -9,12 +9,16 @@ RULE_ID = "SEC006_WORKFLOW_BUILD"
 SEVERITY = "MEDIUM"
 
 MANIFEST_FILE_PATTERNS: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"^\.github[/\\]workflows[/\\]", re.IGNORECASE), "GitHub Actions workflow edit"),
+    (re.compile(r"^(?:\.github[/\\]workflows[/\\]|\.circleci[/\\])", re.IGNORECASE), "CI workflow directory edit"),
     (re.compile(r"(?:^|[/\\])\.gitlab-ci\.ya?ml$", re.IGNORECASE), "GitLab CI workflow edit"),
-    (re.compile(r"(?:^|[/\\])Jenkinsfile(?:\.[a-zA-Z0-9_-]+)?$", re.IGNORECASE), "Jenkinsfile edit"),
+    (re.compile(r"(?:^|[/\\])azure-pipelines\.ya?ml$", re.IGNORECASE), "Azure Pipelines workflow edit"),
+    (re.compile(r"(?:^|[/\\])bitbucket-pipelines\.ya?ml$", re.IGNORECASE), "Bitbucket Pipelines workflow edit"),
+    (re.compile(r"(?:^|[/\\])\.travis\.ya?ml$", re.IGNORECASE), "Travis CI configuration edit"),
+    (re.compile(r"(?:^|[/\\])appveyor\.ya?ml$", re.IGNORECASE), "AppVeyor CI configuration edit"),
+    (re.compile(r"(?:^|[/\\])Jenkinsfile$", re.IGNORECASE), "Jenkinsfile edit"),
     (re.compile(r"(?:^|[/\\])tox\.ini$", re.IGNORECASE), "tox configuration edit"),
     (re.compile(r"(?:^|[/\\])noxfile\.py$", re.IGNORECASE), "noxfile configuration edit"),
-    (re.compile(r"(?:^|[/\\])Dockerfile(?:\.[a-zA-Z0-9_-]+)?$", re.IGNORECASE), "Dockerfile container edit"),
+    (re.compile(r"(?:^|[/\\])Dockerfile$", re.IGNORECASE), "Dockerfile container edit"),
     (re.compile(r"(?:^|[/\\])setup\.(?:py|cfg)$", re.IGNORECASE), "setup configuration edit"),
     (re.compile(r"(?:^|[/\\])pyproject\.toml$", re.IGNORECASE), "pyproject.toml build edit"),
     (re.compile(r"(?:^|[/\\]).*requirements.*\.txt$", re.IGNORECASE), "requirements file edit"),
@@ -22,6 +26,23 @@ MANIFEST_FILE_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"(?:^|[/\\])package\.json$", re.IGNORECASE), "package.json dependency edit"),
     (re.compile(r"(?:^|[/\\])environment\.ya?ml$", re.IGNORECASE), "conda environment dependency edit"),
 ]
+
+DOC_PATH_RE = re.compile(
+    r"(?:^|[/\\])(?:docs?|documentation)(?:[/\\]|$)|"
+    r"\.(?:rst|md)$",
+    re.IGNORECASE,
+)
+
+
+def is_doc_path(path: str) -> bool:
+    """Return True if path is a documentation file or directory (ignoring requirements*.txt)."""
+    clean = path.replace("\\", "/")
+    if re.search(r"(?:^|[/\\]).*requirements.*\.txt$", clean, re.IGNORECASE):
+        return False
+    if clean.endswith(".txt"):
+        return True
+    return bool(DOC_PATH_RE.search(clean))
+
 
 DEPENDENCY_ADD_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"\b(?:install_requires|setup_requires|extras_require)\s*="), "build dependency specification"),
@@ -32,13 +53,15 @@ DEPENDENCY_ADD_PATTERNS: list[tuple[re.Pattern, str]] = [
 def is_manifest_file(path: str) -> bool:
     """Return True if path points to a build config, workflow, or package manifest."""
     clean = path.replace("\\", "/")
+    if is_doc_path(clean):
+        return False
     return any(p.search(clean) for p, _ in MANIFEST_FILE_PATTERNS)
 
 
 def check_workflow_build(patch_text: str) -> list[dict]:
     """
     Scan diff for edits to CI workflows, build configurations, and dependency manifests.
-    Dependency additions apply ONLY to manifest files (not regular Python files or migrations).
+    Dependency additions apply ONLY to manifest files (not regular Python files, migrations, or docs).
     """
     findings = []
     touched_files = extract_touched_files(patch_text)
@@ -46,8 +69,11 @@ def check_workflow_build(patch_text: str) -> list[dict]:
     # 1. Check touched file paths for manifest files
     flagged_files = set()
     for f in touched_files:
+        clean = f.replace("\\", "/")
+        if is_doc_path(clean):
+            continue
         for pattern, desc in MANIFEST_FILE_PATTERNS:
-            if pattern.search(f.replace("\\", "/")):
+            if pattern.search(clean):
                 findings.append({
                     "rule_id": RULE_ID,
                     "severity": SEVERITY,

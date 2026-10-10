@@ -14,10 +14,13 @@ SHELL_PIPE_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"\bcurl\b.*?\|\s*python[23]?\b", re.IGNORECASE), "curl piped directly to python interpreter"),
     (re.compile(r"\bwget\b.*?\|\s*python[23]?\b", re.IGNORECASE), "wget piped directly to python interpreter"),
     (re.compile(r"curl\|(?:ba)?sh", re.IGNORECASE), "shorthand curl|sh pipeline invocation"),
-    (re.compile(r"\b(?:bash|sh)\s+-c\s+[\"']?\$\(curl\b", re.IGNORECASE), "shell subshell curl execution"),
-    (re.compile(r"\b(?:bash|sh)\s+-c\s+[\"']?\$\(wget\b", re.IGNORECASE), "shell subshell wget execution"),
-    (re.compile(r"\bpython[23]?\s+-c\s+[\"']?\$\(curl\b", re.IGNORECASE), "python subshell curl execution"),
-    (re.compile(r"\bcurl\b.*?\s*&&\s*(?:sudo\s+)?(?:/bin/)?(?:ba|z|da)?sh\b", re.IGNORECASE), "download-then-run shell invocation"),
+    (re.compile(r"\b(?:bash|sh)\s+-c\s+[\"']?\$\((?:curl|wget)\b", re.IGNORECASE), "shell subshell download execution"),
+    (re.compile(r"\bpython[23]?\s+-c\s+[\"']?\$\((?:curl|wget)\b", re.IGNORECASE), "python subshell download execution"),
+    (re.compile(r"\beval\s+[\"']?\$\((?:curl|wget)\b", re.IGNORECASE), "eval subshell download execution"),
+    (re.compile(r"\b(?:ba|z|da)?sh\s+<\s*\((?:curl|wget)\b", re.IGNORECASE), "process substitution shell execution"),
+    (re.compile(r"\b(?:iwr|Invoke-WebRequest)\b.*?\|\s*(?:iex|Invoke-Expression)\b", re.IGNORECASE), "PowerShell download and execute"),
+    (re.compile(r"\b(?:iex|Invoke-Expression)\s*(?:\(|&|\$)\s*(?:iwr|Invoke-WebRequest)\b", re.IGNORECASE), "PowerShell invoke expression on web request"),
+    (re.compile(r"\b(?:curl|wget)\b.*?(?:;|&&)\s*(?:sudo\s+)?(?:/bin/)?(?:ba|z|da)?sh\b", re.IGNORECASE), "download-then-run shell invocation"),
 ]
 
 

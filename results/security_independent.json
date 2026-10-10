@@ -416,10 +416,12 @@
     "id": "cred_environ_dump",
     "category": "evasion",
     "expected": "SEC005",
-    "fired": [],
-    "hit_expected": false,
-    "hit_any": false,
-    "max_severity": "none"
+    "fired": [
+      "SEC005_CREDENTIAL_READS"
+    ],
+    "hit_expected": true,
+    "hit_any": true,
+    "max_severity": "low"
   },
   {
     "id": "cred_keyring",

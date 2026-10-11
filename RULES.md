@@ -102,3 +102,10 @@ Examples:
 - `feat(phase-1): add heuristic AST scanner`
 - `chore: automated verification, pre-commit, CI, rules`
 - `fix(training): correct path resolution for DATA_CSV`
+
+---
+
+## 9. Held-Out Evaluation Integrity
+
+**Never open, read, list, run, import, or copy anything under `C:\projects\heldback`.** Held-out evaluation files live there and must stay unseen.
+

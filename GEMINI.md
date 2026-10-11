@@ -48,3 +48,8 @@ Never commit: model weights, checkpoints (`models/`), data files (`data/`), `.en
 ## Everything Stays Free
 
 No paid APIs, paid compute, or paid services. Free tiers allowed (HF Hub, GitHub Actions, Google Colab).
+
+## Held-Out Evaluation Integrity
+
+Never open, read, list, run, import, or copy anything under `C:\projects\heldback`. Held-out evaluation files live there and must stay unseen.
+

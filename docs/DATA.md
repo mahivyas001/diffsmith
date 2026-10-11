@@ -38,7 +38,7 @@ To prevent cross-repository data leakage between training and evaluation, splits
 
 ## 3. Limitations & Evaluation Considerations
 
-- **Issue Overlap:** Only 299 distinct issues are repeated across agent submissions. Cross-validation must group by `instance_id`.
+- **Issue Overlap:** The dataset contains 5,123 patch rows across **300 distinct `instance_id`s** (computed: `df["instance_id"].nunique() == 300`) and **300 distinct issue texts** (computed: `df["problem_statement"].nunique() == 300`). Each agent submission covers all 300 issues, and each issue has exactly one unique problem statement. Cross-validation must group by `instance_id`.
 - **Incomplete Application Metadata:** "Applied" info is missing for ~60% of rows.
 - **Repository Skew:** Heavy repository distribution skew toward `django/django` (1,970 rows) and `sympy/sympy` (1,297 rows).
 - **Shortcut & Fingerprint Risks:** Potential risks of agent-style formatting fingerprints and issue-difficulty shortcuts.
@@ -125,7 +125,7 @@ To maintain high precision without excessive false alarms on benign agent-genera
   1. `SEC002` (pipe to shell: `curl | sh`, `wget | bash`).
   2. `SEC007` (git hooks & hook modifications: `.git/hooks/*`, git hook scripts).
   3. `SEC005` (confirmed credential-file or sensitive credential reads: `TOKEN`, `SECRET`, `KEY`, `PASSWORD`, `PASSWD`, `CREDENTIAL`, `AWS_`, `GITHUB_`, `SSH`, `.env`, `.aws`, `.ssh`, `/etc/passwd`).
-  4. `SEC006` (setup.py custom install `cmdclass` hooks).
+- **MEDIUM Severity Rules:** `SEC006` (sensitive build/CI file edits: `setup.py`, `pyproject.toml`, CI workflows, manifests) produces `MEDIUM`, not `HIGH`. *Docs-only fix: the code was already correct; an earlier version of this section incorrectly listed SEC006 as HIGH.*
 - **Known Limitations:**
   - Alias imports (e.g. `from requests import post as p`), dynamic `getattr()` tricks, and raw `ctypes` bindings beyond direct system calls are not caught by standard regex signatures.
 - **Low / Review Rules:**

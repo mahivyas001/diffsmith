@@ -123,9 +123,9 @@ To maintain high precision without excessive false alarms on benign agent-genera
 - **Severity Aggregation:** Severity counts in reports are evaluated strictly per patch per rule (maximum severity across findings for that patch/rule pair), rather than per raw finding line.
 - **HIGH Severity Rules:** Only the following high-risk findings may produce `HIGH` severity:
   1. `SEC002` (pipe to shell: `curl | sh`, `wget | bash`).
-  2. `SEC007` (git hooks & hook modifications: `.git/hooks/*`, git hook scripts).
+  2. `SEC007` (git hooks and install hooks: `.git/hooks/*`, git hook scripts, custom install command classes, and `cmdclass={'install': ...}` hooks in `setup.py`).
   3. `SEC005` (confirmed credential-file or sensitive credential reads: `TOKEN`, `SECRET`, `KEY`, `PASSWORD`, `PASSWD`, `CREDENTIAL`, `AWS_`, `GITHUB_`, `SSH`, `.env`, `.aws`, `.ssh`, `/etc/passwd`).
-  4. `SEC006` for `setup.py` / `pyproject.toml` edits that add a `cmdclass` or install hook: these can run arbitrary code at `pip install` time and are therefore rated `HIGH`. Other `SEC006` findings (CI workflow edits, manifest-only dependency additions) are `MEDIUM`.
+  *(Note: `SEC006` emits `MEDIUM` for `setup.py` and CI/build file edits. When a patch adds a `setup.py` `cmdclass` install hook, `SEC006` emits `MEDIUM` for the build file edit, while the `HIGH` severity finding is emitted by `SEC007`.)*
 - **Known Limitations:**
   - Alias imports (e.g. `from requests import post as p`), dynamic `getattr()` tricks, and raw `ctypes` bindings beyond direct system calls are not caught by standard regex signatures.
 - **Low / Review Rules:**

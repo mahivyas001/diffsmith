@@ -125,7 +125,7 @@ To maintain high precision without excessive false alarms on benign agent-genera
   1. `SEC002` (pipe to shell: `curl | sh`, `wget | bash`).
   2. `SEC007` (git hooks & hook modifications: `.git/hooks/*`, git hook scripts).
   3. `SEC005` (confirmed credential-file or sensitive credential reads: `TOKEN`, `SECRET`, `KEY`, `PASSWORD`, `PASSWD`, `CREDENTIAL`, `AWS_`, `GITHUB_`, `SSH`, `.env`, `.aws`, `.ssh`, `/etc/passwd`).
-- **MEDIUM Severity Rules:** `SEC006` (sensitive build/CI file edits: `setup.py`, `pyproject.toml`, CI workflows, manifests) produces `MEDIUM`, not `HIGH`. *Docs-only fix: the code was already correct; an earlier version of this section incorrectly listed SEC006 as HIGH.*
+  4. `SEC006` for `setup.py` / `pyproject.toml` edits that add a `cmdclass` or install hook: these can run arbitrary code at `pip install` time and are therefore rated `HIGH`. Other `SEC006` findings (CI workflow edits, manifest-only dependency additions) are `MEDIUM`.
 - **Known Limitations:**
   - Alias imports (e.g. `from requests import post as p`), dynamic `getattr()` tricks, and raw `ctypes` bindings beyond direct system calls are not caught by standard regex signatures.
 - **Low / Review Rules:**

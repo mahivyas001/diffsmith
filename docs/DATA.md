@@ -147,3 +147,13 @@ results/security_independent.md and results/security_independent.json predate th
 - **No Calibrated Threshold:** Calibration on 300 real issues and 5,123 real patches found no candidate threshold with 0 false alarms on both sets (see `results/injection_ml_calibration.md`, labelled "calibrated, NOT held-out"). Calling the combined helpers with `use_ml=True` but no explicit threshold returns a `"ML disabled: no calibrated threshold"` status finding. The model assigns near-1.0 injection probability to ordinary code and comments; the cause is not established, and the layer is excluded from all verdicts until a suitable model or threshold is identified.
 - **Finding Schema:** ML findings use rule ID `INJ_ML001` with severity capped at `MEDIUM` (never `HIGH`).
 
+---
+
+## 9. CodeBERT Model (Experimental)
+
+- **Synthetic Labels:** Labels are synthetic (gold patch = 0; patch with one comparison swapped or one line commented out by `corrupt_patch` in `data_loader.py` = 1).
+- **Split Leakage:** The training validation split is a random row split with 94 `instance_id`s in both train and validation.
+- **No Evaluation Metrics:** No metrics are reported for it.
+- **Weights Not Distributed:** Weights are not distributed.
+- **Excluded From Verdicts:** It is excluded from verdicts.
+

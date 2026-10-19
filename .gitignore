@@ -53,3 +53,7 @@ data/heldout/heldout_checked.csv
 
 # Held-back evaluation output (written next to the eval script; never committed)
 scripts/results_heldback.md
+
+# Calibration score cache (never committed)
+results/injection_ml_cache.json
+

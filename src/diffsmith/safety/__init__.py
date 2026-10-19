@@ -13,6 +13,14 @@ from .workflow_build import check_workflow_build
 from .hook_tampering import check_hook_tampering
 from .dynamic_access import check_dynamic_access
 from .injection import scan_text, scan_patch_comments
+from .injection_ml import (
+    is_available as ml_is_available,
+    unavailable_reason as ml_unavailable_reason,
+    scan_text_ml,
+    scan_patch_comments_ml,
+    scan_text_all,
+    scan_patch_comments_all,
+)
 
 __all__ = [
     "scan_patch",
@@ -29,4 +37,10 @@ __all__ = [
     "check_dynamic_access",
     "scan_text",
     "scan_patch_comments",
+    "ml_is_available",
+    "ml_unavailable_reason",
+    "scan_text_ml",
+    "scan_patch_comments_ml",
+    "scan_text_all",
+    "scan_patch_comments_all",
 ]

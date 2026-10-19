@@ -133,3 +133,15 @@ To maintain high precision without excessive false alarms on benign agent-genera
   - Calls inside scratch scripts (`reproduce*`, `repro*`, `debug*`, `tmp*`) or test files are capped at `low` severity for `SEC001`, `SEC003`, and `SEC005`.
   - `SEC006` dependency rules trigger strictly on manifest and build files (`pyproject.toml`, `setup.py`, `setup.cfg`, `requirements*.txt`, `Pipfile`, `package.json`). Variables named `dependencies` in non-manifest files (such as Django migration files) are ignored. Documentation paths (`docs/`, `*.rst`, `*.md`, and non-requirements `.txt`) are excluded.
   - Vendored directory additions (`node_modules/`, `site-packages/`, `venv/`, etc.) produce a distinct `vendored_directory_added` finding (`review`). Scratch script additions produce `scratch_script_added` (`low`).
+
+---
+
+## 8. Optional Machine-Learning Injection Detector Layer
+
+- **Status:** Experimental. The ML layer is **off by default** in all pipeline entry points. It does not contribute to any verdict or severity rating.
+- **Layer Overview:** `diffsmith.safety.injection_ml` provides an optional secondary detector alongside the frozen regex shield (`injection.py`). It is activated only when `use_ml=True` and an explicit numeric threshold are both passed to the combined helper functions.
+- **Model & Checkpoint:** Uses `ProtectAI/deberta-v3-base-prompt-injection-v2` pinned to revision `90c9989b1a342275dd0d1a95aad283c04e075671` with SHA-256 verified safetensors weights.
+- **Offline & Graceful Fallback:** Operates strictly offline (`local_files_only=True`). If the model cache or dependencies are missing, the layer emits an explicit `"ML NOT RUN: <reason>"` status instead of an empty result.
+- **No Calibrated Threshold:** Calibration on 300 real issues and 5,123 real patches found no candidate threshold with 0 false alarms on both sets (see `results/injection_ml_calibration.md`, labelled "calibrated, NOT held-out"). Calling the combined helpers with `use_ml=True` but no explicit threshold returns a `"ML disabled: no calibrated threshold"` status finding. The model assigns near-1.0 injection probability to ordinary code and comments; the cause is not established, and the layer is excluded from all verdicts until a suitable model or threshold is identified.
+- **Finding Schema:** ML findings use rule ID `INJ_ML001` with severity capped at `MEDIUM` (never `HIGH`).
+

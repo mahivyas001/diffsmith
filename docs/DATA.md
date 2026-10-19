@@ -134,6 +134,8 @@ To maintain high precision without excessive false alarms on benign agent-genera
   - `SEC006` dependency rules trigger strictly on manifest and build files (`pyproject.toml`, `setup.py`, `setup.cfg`, `requirements*.txt`, `Pipfile`, `package.json`). Variables named `dependencies` in non-manifest files (such as Django migration files) are ignored. Documentation paths (`docs/`, `*.rst`, `*.md`, and non-requirements `.txt`) are excluded.
   - Vendored directory additions (`node_modules/`, `site-packages/`, `venv/`, etc.) produce a distinct `vendored_directory_added` finding (`review`). Scratch script additions produce `scratch_script_added` (`low`).
 
+results/security_independent.md and results/security_independent.json predate the SEC006/SEC007 severity correction (they record wf_setup_cmdclass as SEC006 HIGH; the current scanner emits SEC006 MEDIUM and SEC007 HIGH for a setup.py cmdclass install hook, verified empirically); they are not frozen records and are not used as evidence.
+
 ---
 
 ## 8. Optional Machine-Learning Injection Detector Layer

@@ -488,7 +488,10 @@ def main():
         "--codebert",
         dest="use_codebert",
         action="store_true",
-        help="Enable experimental CodeBERT fix integrity layer (default: OFF).",
+        help=(
+            "Enable the experimental CodeBERT signal (synthetic labels, no evaluation; "
+            "shown separately and never part of the verdict). Default: OFF."
+        ),
     )
 
     args = parser.parse_args()
